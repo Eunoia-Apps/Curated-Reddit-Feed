@@ -6,6 +6,14 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		17DF15722D60596900043AFC /* GoogleGeminiAI in Frameworks */ = {isa = PBXBuildFile; productRef = 17DF15712D60596900043AFC /* GoogleGeminiAI */; };
+		17DF15752D6059CD00043AFC /* LangChain in Frameworks */ = {isa = PBXBuildFile; productRef = 17DF15742D6059CD00043AFC /* LangChain */; };
+		17DF15782D605A8400043AFC /* Fuzi in Frameworks */ = {isa = PBXBuildFile; productRef = 17DF15772D605A8400043AFC /* Fuzi */; };
+		17DF158E2D605B1C00043AFC /* ActivityIndicatorView in Frameworks */ = {isa = PBXBuildFile; productRef = 17DF158D2D605B1C00043AFC /* ActivityIndicatorView */; };
+		17DF15912D605C7400043AFC /* ChatField in Frameworks */ = {isa = PBXBuildFile; productRef = 17DF15902D605C7400043AFC /* ChatField */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		17DF155F2D6058B600043AFC /* Duo Idea Test.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Duo Idea Test.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +31,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				17DF15912D605C7400043AFC /* ChatField in Frameworks */,
+				17DF15782D605A8400043AFC /* Fuzi in Frameworks */,
+				17DF15752D6059CD00043AFC /* LangChain in Frameworks */,
+				17DF158E2D605B1C00043AFC /* ActivityIndicatorView in Frameworks */,
+				17DF15722D60596900043AFC /* GoogleGeminiAI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +78,11 @@
 			);
 			name = "Duo Idea Test";
 			packageProductDependencies = (
+				17DF15712D60596900043AFC /* GoogleGeminiAI */,
+				17DF15742D6059CD00043AFC /* LangChain */,
+				17DF15772D605A8400043AFC /* Fuzi */,
+				17DF158D2D605B1C00043AFC /* ActivityIndicatorView */,
+				17DF15902D605C7400043AFC /* ChatField */,
 			);
 			productName = "Duo Idea Test";
 			productReference = 17DF155F2D6058B600043AFC /* Duo Idea Test.app */;
@@ -94,6 +112,13 @@
 			);
 			mainGroup = 17DF15562D6058B600043AFC;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				17DF15702D60596900043AFC /* XCRemoteSwiftPackageReference "gemini-ai-swift" */,
+				17DF15732D6059CD00043AFC /* XCRemoteSwiftPackageReference "langchain-swift-custom" */,
+				17DF15762D605A8400043AFC /* XCRemoteSwiftPackageReference "Fuzi" */,
+				17DF158C2D605B1C00043AFC /* XCRemoteSwiftPackageReference "ActivityIndicatorView" */,
+				17DF158F2D605C7400043AFC /* XCRemoteSwiftPackageReference "ChatField" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 17DF15602D6058B600043AFC /* Products */;
 			projectDirPath = "";
@@ -324,6 +349,77 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		17DF15702D60596900043AFC /* XCRemoteSwiftPackageReference "gemini-ai-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/DEmpire412/gemini-ai-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+		17DF15732D6059CD00043AFC /* XCRemoteSwiftPackageReference "langchain-swift-custom" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Eunoia-Apps/langchain-swift-custom.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+		17DF15762D605A8400043AFC /* XCRemoteSwiftPackageReference "Fuzi" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/cezheng/Fuzi";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.1.3;
+			};
+		};
+		17DF158C2D605B1C00043AFC /* XCRemoteSwiftPackageReference "ActivityIndicatorView" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/exyte/ActivityIndicatorView";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.1.1;
+			};
+		};
+		17DF158F2D605C7400043AFC /* XCRemoteSwiftPackageReference "ChatField" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kevinhermawan/ChatField";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.4;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		17DF15712D60596900043AFC /* GoogleGeminiAI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 17DF15702D60596900043AFC /* XCRemoteSwiftPackageReference "gemini-ai-swift" */;
+			productName = GoogleGeminiAI;
+		};
+		17DF15742D6059CD00043AFC /* LangChain */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 17DF15732D6059CD00043AFC /* XCRemoteSwiftPackageReference "langchain-swift-custom" */;
+			productName = LangChain;
+		};
+		17DF15772D605A8400043AFC /* Fuzi */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 17DF15762D605A8400043AFC /* XCRemoteSwiftPackageReference "Fuzi" */;
+			productName = Fuzi;
+		};
+		17DF158D2D605B1C00043AFC /* ActivityIndicatorView */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 17DF158C2D605B1C00043AFC /* XCRemoteSwiftPackageReference "ActivityIndicatorView" */;
+			productName = ActivityIndicatorView;
+		};
+		17DF15902D605C7400043AFC /* ChatField */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 17DF158F2D605C7400043AFC /* XCRemoteSwiftPackageReference "ChatField" */;
+			productName = ChatField;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 17DF15572D6058B600043AFC /* Project object */;
 }
