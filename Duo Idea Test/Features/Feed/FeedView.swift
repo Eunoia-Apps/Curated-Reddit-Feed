@@ -294,11 +294,6 @@ struct LoadingView: View {
                     
                     HStack(spacing: 12) {
                         
-                        Image(systemName: "globe")
-                            .font(.system(size: 24))
-                            .redacted(reason: .placeholder)
-                            .shimmerEffect(isLoading: .constant(true))
-                        
                         Text("placeholder placeholder placeholder placeholder placeholder placeholders")
                             .font(.headline)
                             .fontWeight(.semibold)
