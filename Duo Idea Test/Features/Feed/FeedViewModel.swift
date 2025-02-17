@@ -10,6 +10,107 @@ import GoogleGeminiAI
 import LangChain
 import Fuzi
 
+let topicCategories: [String] = [
+    
+    // Technology
+        "Artificial Intelligence & Machine Learning",
+        "Blockchain & Cryptocurrency",
+        "Cybersecurity & Data Privacy",
+        "iOS Development & Swift",
+        "Cloud Computing & DevOps",
+        "Biotechnology & Genetic Engineering",
+        "Quantum Computing",
+        "Space Exploration & Aerospace Tech",
+        "Augmented Reality & Virtual Reality",
+        "Automotive Technology & Electric Vehicles",
+        "Renewable Energy & Sustainability",
+        "Gaming Industry & Game Development",
+        "Digital Marketing & SEO",
+        "UX/UI Design & Product Development",
+        "Philosophy of Technology & Ethics",
+        
+    // Business
+    "Stock Market & Investment Strategies",
+    "Entrepreneurship & Startups",
+    "E-Commerce & Digital Business",
+    "Corporate Leadership & Management",
+    "Personal Finance & Wealth Management",
+    "Marketing Strategies & Branding",
+    "Supply Chain & Logistics",
+    "Real Estate & Property Investment",
+
+    // Health
+    "Mental Health & Wellness",
+    "Nutrition & Dietetics",
+    "Fitness & Strength Training",
+    "Holistic & Alternative Medicine",
+    "Medical Breakthroughs & Innovations",
+    "Public Health & Epidemiology",
+    "Sleep Science & Optimization",
+    "Neuroscience & Cognitive Health",
+
+    // Education
+    "EdTech & Online Learning",
+    "STEM Education & Innovation",
+    "Language Learning & Linguistics",
+    "Special Education & Accessibility",
+    "Higher Education & Research",
+    "Study Techniques & Productivity",
+    "Education Policy & Reform",
+    "AI in Education & Personalized Learning",
+
+    // Entertainment
+    "Film & Television Industry",
+    "Music Production & Trends",
+    "Video Games & eSports",
+    "Streaming Platforms & Content Creation",
+    "Celebrity Culture & Pop Trends",
+    "Animation & Visual Effects",
+    "Podcasting & Audio Storytelling",
+    "Comedy & Stand-Up Culture",
+
+    // Sports
+    "Soccer & International Football",
+    "Basketball & NBA Trends",
+    "Martial Arts & Combat Sports",
+    "Formula 1 & Motorsport Racing",
+    "Olympic Sports & Athletes",
+    "Extreme Sports & Adventure Challenges",
+    "Fitness Competitions & Bodybuilding",
+    "Sports Science & Injury Prevention",
+
+    // Lifestyle
+    "Minimalism & Decluttering",
+    "Personal Development & Mindfulness",
+    "Fashion Trends & Sustainable Clothing",
+    "Home Decor & Interior Design",
+    "Parenting & Family Life",
+    "Work-Life Balance & Productivity",
+    "Hobbies & Creative Arts",
+    "Self-Care & Mental Resilience",
+
+    // Travel
+    "Backpacking & Budget Travel",
+    "Luxury Travel & Resorts",
+    "Solo Travel & Digital Nomad Lifestyle",
+    "Cultural Experiences & Heritage Tourism",
+    "Adventure Travel & Extreme Destinations",
+    "Eco-Tourism & Sustainable Travel",
+    "Best Cities for Remote Work",
+    "Airlines & Travel Hacks",
+
+    // Food
+    "Gourmet Cooking & Fine Dining",
+    "Street Food & Local Cuisines",
+    "Plant-Based & Vegan Recipes",
+    "Baking & Dessert Trends",
+    "Food Science & Nutrition",
+    "Fermentation & Probiotic Foods",
+    "Wine, Coffee & Beverage Culture",
+    "Meal Prep & Healthy Eating"
+]
+
+
 @MainActor
 class FeedViewModel: ObservableObject {
     
@@ -35,7 +136,7 @@ class FeedViewModel: ObservableObject {
     }
     
     
-    // MARK: -
+    // MARK: - Subreddits
     let generalInterestSubreddits: [String] = [
         "r/AskReddit", "r/funny", "r/pics", "r/videos", "r/todayilearned"
     ]
@@ -119,15 +220,11 @@ class FeedViewModel: ObservableObject {
     // UserDefaults storage
     static let userDefaults = UserDefaults(suiteName: "group.demo.app")!
     
-    @AppStorage("hasPro", store: userDefaults) var hasPro: Bool = true
-    @AppStorage("enableCustomApiKey") var enableCustomAPIKey = false
-    @AppStorage("customApiKey") var customAPIKey = ""
-    @AppStorage("GeminiAPIKey") var apiKey = ""
+    @AppStorage("GeminiAPIKey") var apiKey = "AIzaSyBRb2joOU4_8KWWiJn2MhL1IS_Tm6-Q8Zo"
     @AppStorage("SerperAPIKey") var serperApiKey = "0d34a8e70e5fa38a3f3371169678d8eb6c93c96a"
     
     @Published var viewState: SearchState = .input
-    @Published var waiting: Bool = false
-    
+  
     @Published var model: GenerativeModel?
     @AppStorage("keywords") var keywords: String = ""
     @Published var answer: String = ""
@@ -136,15 +233,6 @@ class FeedViewModel: ObservableObject {
     @Published var currentWebpage = ""
     @Published var errorMessage = ""
     @Published var error = ""
-    
-    @AppStorage("X") private var isXEnabled = true
-    @AppStorage("Reddit") private var isRedditEnabled = true
-    @AppStorage("Instagram") private var isInstagramEnabled = true
-    @AppStorage("YouTube") private var isYouTubeEnabled = true
-    @AppStorage("LinkedIn") private var isLinkedInEnabled = true
-    @AppStorage("Hacker News") private var isHackerNewsEnabled = true
-    @AppStorage("Substack") private var isSubstackEnabled = true
-    @AppStorage("Medium") private var isMediumEnabled = true
     
     @Published var sourceArray: [SearchItem] = []
     
@@ -180,19 +268,15 @@ class FeedViewModel: ObservableObject {
             isLoadingMore = true
         }
         
-        
-        
-        waiting = true
-        
-        let apiKey = "AIzaSyBRb2joOU4_8KWWiJn2MhL1IS_Tm6-Q8Zo"
-        
+       
         Task(priority: .high) {
             do {
                 
                 if array.isEmpty {
                     model = GenerativeModel(
-                        name: "gemini-2.0-flash-thinking-exp",
+                        name: "gemini-2.0-flash",
                         apiKey: apiKey,
+                        generationConfig: GenerationConfig(temperature: 0.3),
                         safetySettings: safetySettings,
                         systemInstruction: """
                                            Here is a list of keywords the user has inputted: \(keywords).
@@ -203,7 +287,7 @@ class FeedViewModel: ObservableObject {
                                        
                                            ["r/name", "r/name", ...]
                                        
-                                           Do not include any explanations, ONLY give a raw array. No json needed.
+                                           Do not include any explanations or JSON, ONLY give me a raw array.
                                        """
                     )
                     
@@ -263,12 +347,13 @@ class FeedViewModel: ObservableObject {
                         let image = extractFaviconURL(from: html, baseURL: url)
                         
                         let categoryResponse = try await GenerativeModel(
-                            name: "gemini-2.0-flash",
+                            name: "gemini-2.0-flash-lite-preview",
                             apiKey: apiKey,
+                            generationConfig: GenerationConfig(temperature: 0.3),
                             safetySettings: safetySettings, systemInstruction: """
-                                You are an AI that assigns categories to Reddit posts like 'technology', 'gaming', 'finance', etc.
-                            
-                                Do not include any explanations, ONLY give a raw category.
+                               You are an AI responsible for categorizing Reddit posts using the predefined topic list: \(topicCategories).
+
+                               Give me ONLY a single category from this list—nothing else. Do not provide explanations, additional context, or categories that are not explicitly included in the list.
                             """
                         ).generateContent("Categorize this post: \(link.title ?? "")")
                         
@@ -279,6 +364,8 @@ class FeedViewModel: ObservableObject {
                             category: categoryResponse.text ?? "General",
                             icon: image
                         )
+                        print("\nTitle: " + link.title!)
+                        print("Category: " + categoryResponse.text! + "\n")
                         
                         item.calculateAIScore()
                         

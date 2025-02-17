@@ -8,7 +8,6 @@
 import SwiftUI
 import ActivityIndicatorView
 import ChatField
-import SkeletonUI
 
 
 struct FeedView: View {
