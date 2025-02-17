@@ -6,10 +6,6 @@
 //
 
 import SwiftUI
-import LangChain
-import GoogleGeminiAI
-import Fuzi
-import Foundation
 import ActivityIndicatorView
 import ChatField
 import SkeletonUI
@@ -171,8 +167,18 @@ struct FeedView: View {
                                     }
                                     
                                     if viewModel.isLoadingMore {
-                                        ProgressView()
-                                            .padding()
+                                        
+                                        VStack {
+                                            ActivityIndicatorView(isVisible: .constant(true), type: .opacityDots(count: 3, inset: 2))
+                                                .frame(width: 32, height: 20)
+                                            
+                                            Text("Fetching your posts")
+                                                .font(.caption2)
+                                                .fontWeight(.medium)
+                                                .fontDesign(.rounded)
+                                        }
+                                        .padding()
+                                        
                                     }
                                 }
                             }
@@ -286,9 +292,19 @@ struct FeedView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 
-                ToolbarItem(placement: .principal) {
-                    Text("Feed")
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Text("Your Feed")
                         .font(.system(size: 16.5, weight: .bold, design: .rounded))
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    NavigationLink {
+                        
+                    } label: {
+                        Image(systemName: "heart")
+                            .font(.system(size: 16, weight: .medium, design: .rounded))
+                    }
+                    .buttonStyle(.plain)
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -301,15 +317,7 @@ struct FeedView: View {
                     .buttonStyle(.plain)
                 }
                 
-                ToolbarItem(placement: .navigationBarLeading) {
-                    NavigationLink {
-                        
-                    } label: {
-                        Image(systemName: "heart")
-                            .font(.system(size: 16, weight: .medium, design: .rounded))
-                    }
-                    .buttonStyle(.plain)
-                }
+                
                 
             }
             .onAppear {

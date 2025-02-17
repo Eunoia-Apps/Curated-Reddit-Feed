@@ -125,7 +125,7 @@ class FeedViewModel: ObservableObject {
     @AppStorage("GeminiAPIKey") var apiKey = ""
     @AppStorage("SerperAPIKey") var serperApiKey = "0d34a8e70e5fa38a3f3371169678d8eb6c93c96a"
     
-     var viewState: SearchState = .input
+    @Published var viewState: SearchState = .input
     @Published var waiting: Bool = false
     
     @Published var model: GenerativeModel?
@@ -221,11 +221,13 @@ class FeedViewModel: ObservableObject {
                 }
                 
                 if array.count >= 3 {
-                    linkCount = 2
+                    linkCount = 3
                 } else if array.count == 2 {
                     linkCount = 2
                 } else {
-                    linkCount = 1
+                    
+                    //One subreddit, fetch 5 posts at a time
+                    linkCount = 5
                 }
                 
                 var miniArray = [SearchItem]()
@@ -247,7 +249,7 @@ class FeedViewModel: ObservableObject {
                     
                     guard let organic = serperResult.organic else { throw "Missing API Data" }
                     
-                    print("Link Count for \(subreddit): \(organic.count)")
+                    print("\nLink Count for \(subreddit): \(organic.count)\n")
                     
                     
                     for link in organic {
@@ -302,11 +304,13 @@ class FeedViewModel: ObservableObject {
                             miniArray.append(item)
                         }
                         
+                        // Sort by AI Score descending
                         miniArray.sort { $0.aiScore > $1.aiScore }
                         
                         
                     }
                     
+                    // After nested loop ends; by subreddit
                     if array.count >= 3 {
                         withAnimation(.smooth(duration: 0.3)) {
                             sourceArray += miniArray
@@ -314,9 +318,13 @@ class FeedViewModel: ObservableObject {
                         miniArray = []
                     }
                     
+                    withAnimation(.smooth(duration: 0.3)) {
+                        viewState = .success
+                    }
                     
                 }
                 
+                // After entire loop ends
                 if array.count < 3 {
                     withAnimation(.smooth(duration: 0.3)) {
                         sourceArray += miniArray
@@ -328,9 +336,9 @@ class FeedViewModel: ObservableObject {
                 currentPage += 1
                 isLoadingMore = false
                 
-                withAnimation(.smooth(duration: 0.3)) {
-                    viewState = .success
-                }
+//                withAnimation(.smooth(duration: 0.3)) {
+//                    viewState = .success
+//                }
                 
                 
             } catch {
