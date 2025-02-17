@@ -18,7 +18,6 @@ struct SearchItem: Codable, Identifiable {
     var isDisliked: Bool = false
     var category: String = ""
     var icon: URL?
-    
 }
 
 

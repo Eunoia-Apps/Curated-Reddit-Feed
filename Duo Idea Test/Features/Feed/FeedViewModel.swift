@@ -339,63 +339,103 @@ class FeedViewModel: ObservableObject {
                     for link in organic {
                         guard let urlString = link.link, let url = URL(string: urlString) else { continue }
                         
-                        let data = try? await URLSession.shared.data(for: URLRequest(url: url, timeoutInterval: 15))
+                        // Fetch the raw HTML first (still needed for favicon, etc.)
+                        guard let htmlData = try? await URLSession.shared.data(for: URLRequest(url: url, timeoutInterval: 15)),
+                              let html = String(data: htmlData.0, encoding: .utf8) else { continue }
                         
-                        guard let html = data.flatMap({ String(data: $0.0, encoding: .utf8) }) else { continue }
-                        
-                        let doc = try? HTMLDocument(string: html, encoding: .utf8)
                         let image = extractFaviconURL(from: html, baseURL: url)
                         
+                        // Try to get the post date (and other data) from Reddit's JSON endpoint
+                        var title: String = link.title ?? "No title"
+                        var author: String = ""
+                        //var subredditName: String = ""
+                        //var score: Int = 0
+                       //var numComments: Int = 0
+                        var thumbnail: URL? = nil
+                        var postDate: Date? = nil
+                        let postURL: String = urlString
+                        
+                        if let host = url.host, host.contains("reddit.com") {
+                            // Append ".json" if necessary.
+                            let jsonURLString = url.absoluteString.hasSuffix(".json") ? url.absoluteString : url.absoluteString + ".json"
+                            if let jsonURL = URL(string: jsonURLString),
+                               let (jsonData, _) = try? await URLSession.shared.data(for: URLRequest(url: jsonURL, timeoutInterval: 15)),
+                               let jsonArray = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [Any],
+                               let firstItem = jsonArray.first as? [String: Any],
+                               let dataDict = firstItem["data"] as? [String: Any],
+                               let children = dataDict["children"] as? [[String: Any]],
+                               let firstChild = children.first,
+                               let childData = firstChild["data"] as? [String: Any] {
+                                
+                                title = childData["title"] as? String ?? title
+                                author = childData["author"] as? String ?? ""
+                                //subredditName = childData["subreddit"] as? String ?? ""
+                                //score = childData["score"] as? Int ?? 0
+                                //numComments = childData["num_comments"] as? Int ?? 0
+                                if let createdUTC = childData["created_utc"] as? TimeInterval {
+                                    postDate = Date(timeIntervalSince1970: createdUTC)
+                                }
+                                if let thumbString = childData["thumbnail"] as? String,
+                                   !thumbString.isEmpty,
+                                   thumbString.lowercased() != "self",
+                                   thumbString.lowercased() != "default",
+                                   let thumbURL = URL(string: thumbString) {
+                                    thumbnail = thumbURL
+                                }
+                                
+                                print("Parsed from JSON – Title: \(title), Author: \(author)")
+                                print("Post Date: \(postDate?.description ?? "nil"), Thumbnail: \(thumbnail?.absoluteString ?? "none")")
+                            }
+                        }
+                        
+                        // Fallback: if postDate is still nil, try extracting from HTML.
+                        if postDate == nil {
+                            postDate = extractRedditPostDate(from: html) ?? Date()
+                        }
+                        
+                        // Get category via your AI model.
                         let categoryResponse = try await GenerativeModel(
                             name: "gemini-2.0-flash-lite-preview",
                             apiKey: apiKey,
                             generationConfig: GenerationConfig(temperature: 0.3),
-                            safetySettings: safetySettings, systemInstruction: """
+                            safetySettings: safetySettings,
+                            systemInstruction: """
                                You are an AI responsible for categorizing Reddit posts using the predefined topic list: \(topicCategories).
 
-                               Give me ONLY a single category from this list—nothing else. Do not provide explanations, additional context, or categories that are not explicitly included in the list.
+                               Give me ONLY a single category from this list—nothing else. Do not provide explanations or additional context.
                             """
-                        ).generateContent("Categorize this post: \(link.title ?? "")")
+                        ).generateContent("Categorize this post: \(title)")
                         
-                        let postDate = extractRedditPostDate(from: html) ?? Date() // Fallback to current date if not found
+                        // Build your SearchItem. (Extend SearchItem if you wish to store more fields.)
                         var item = SearchItem(
-                            title: link.title ?? "No title",
-                            link: urlString,
-                            postDate: postDate,
+                            title: title,
+                            link: postURL,
+                            postDate: postDate!, // now hopefully extracted from JSON (or fallback)
                             category: categoryResponse.text ?? "General",
-                            icon: image
+                            icon: thumbnail ?? image
                         )
-                        print("\nTitle: " + link.title!)
-                        print("Category: " + categoryResponse.text! + "\n")
+                        
+                        print("\nFinal Item – Title: \(title), Category: \(categoryResponse.text ?? "General")\n")
                         
                         item.calculateAIScore()
                         
-                        print(item.aiScore)
-                        
-                        //check if already been liked before
-                        if AlgorithmCore.shared.likedPosts.contains(where: { item in
-                            (item.title == link.title!) || (item.link == link.link!)
+                        if AlgorithmCore.shared.likedPosts.contains(where: { existing in
+                            (existing.title == link.title!) || (existing.link == link.link!)
                         }) {
                             item.isLiked = true
                         }
                         
-                        
-                        //check if disliked before
-                        if AlgorithmCore.shared.dislikedPosts.contains(where: { item in
-                            (item.title == link.title!) || (item.link == link.link!)
+                        if AlgorithmCore.shared.dislikedPosts.contains(where: { existing in
+                            (existing.title == link.title!) || (existing.link == link.link!)
                         }) {
                             item.isDisliked = true
                         }
-                        
                         
                         if !item.isDisliked {
                             miniArray.append(item)
                         }
                         
-                        // Sort by AI Score descending
                         miniArray.sort { $0.aiScore > $1.aiScore }
-                        
-                        
                     }
                     
                     // After nested loop ends; by subreddit
@@ -458,29 +498,61 @@ class FeedViewModel: ObservableObject {
     }
     
     private func extractRedditPostDate(from html: String) -> Date? {
-        do {
-            let document = try HTMLDocument(string: html, encoding: .utf8)
-            
-            // First try to find a <time> tag with a datetime attribute
-            if let timeElement = document.firstChild(xpath: "//time"),
-               let datetime = timeElement.attr("datetime") {
-                let formatter = ISO8601DateFormatter()
-                if let date = formatter.date(from: datetime) {
-                    return date
-                }
-            }
-            
-            // Alternatively, try a meta tag (if available)
-            if let metaElement = document.firstChild(xpath: "//meta[@property='article:published_time']"),
-               let content = metaElement.attr("content") {
-                let formatter = ISO8601DateFormatter()
-                if let date = formatter.date(from: content) {
-                    return date
-                }
-            }
-        } catch {
-            print("Error extracting post date: \(error)")
+        // Regex to find: "created_timestamp":"2025-02-17T16:08:09.946000+0000"
+        let pattern = #""created_timestamp":"([^"]+)""#
+        guard let regex = try? NSRegularExpression(pattern: pattern) else {
+            return nil
         }
+        
+        let range = NSRange(html.startIndex..., in: html)
+        guard
+            let match = regex.firstMatch(in: html, options: [], range: range),
+            let dateRange = Range(match.range(at: 1), in: html)
+        else {
+            // No match found
+            return nil
+        }
+        
+        // Extract the raw date string, e.g. "2025-02-17T16:08:09.946000+0000"
+        var dateString = String(html[dateRange])
+        print("Found created_timestamp: \(dateString)")
+        
+        // Replace +0000 with +00:00 so ISO8601DateFormatter can parse it
+        // e.g. "2025-02-17T16:08:09.946000+0000" => "2025-02-17T16:08:09.946000+00:00"
+        dateString = dateString.replacingOccurrences(
+            of: #"\+(\d{4})$"#,
+            with: "+$1:",
+            options: .regularExpression
+        )
+        // That replacement leaves us with "+0000:" at the end, so we fix that last colon:
+        // => "2025-02-17T16:08:09.946000+0000:"
+        // => "2025-02-17T16:08:09.946000+00:00"
+        dateString = dateString.replacingOccurrences(of: "+0000:", with: "+00:00")
+        
+        // Attempt ISO8601 parsing first (handles fractional seconds)
+        let isoFormatter = ISO8601DateFormatter()
+        isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        
+        if let date = isoFormatter.date(from: dateString) {
+            print("Parsed date with ISO8601DateFormatter: \(date)")
+            return date
+        } else {
+            print("ISO8601DateFormatter failed. dateString: \(dateString)")
+        }
+        
+        // Fallback: custom DateFormatter if the ISO8601 parser fails
+        let customFormatter = DateFormatter()
+        customFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZZZZ"
+        customFormatter.locale = Locale(identifier: "en_US_POSIX")
+        
+        if let date = customFormatter.date(from: dateString) {
+            print("Parsed date with custom DateFormatter: \(date)")
+            return date
+        } else {
+            print("Custom DateFormatter also failed. dateString: \(dateString)")
+        }
+        
+        // If everything fails, return nil
         return nil
     }
 }

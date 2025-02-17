@@ -140,26 +140,52 @@ struct FeedList: View {
                                 
                                 Link(destination: URL(string: link.link)!) {
                                     VStack(spacing: 16) {
-                                        
-                                        Rectangle()
-                                            .fill(Color.gray.opacity(0.1))
-                                            .frame(height: 200)
-                                            .cornerRadius(8)
+                                        // Thumbnail image in place of the gray rectangle.
+                                        if let thumbnail = link.icon {
+                                            AsyncImage(url: thumbnail) { image in
+                                                image
+                                                    .resizable()
+                                                    .scaledToFill()
+                                                    .frame(height: 200)
+                                                    .clipped()
+                                                    .cornerRadius(8)
+                                            } placeholder: {
+                                                Rectangle()
+                                                    .fill(Color.gray.opacity(0.1))
+                                                    .frame(height: 200)
+                                                    .cornerRadius(8)
+                                            }
+                                        } else {
+                                            Rectangle()
+                                                .fill(Color.gray.opacity(0.1))
+                                                .frame(height: 200)
+                                                .cornerRadius(8)
+                                        }
                                         
                                         HStack(spacing: 12) {
-                                            if let icon = link.icon {
-                                                AsyncImage(url: icon) { image in
-                                                    image
+                                            // Display a small icon (if needed; adjust if your model provides a separate favicon).
+                                            if let host = URL(string: link.link)?.host, host.contains("reddit.com") {
+                                                    // Display a custom "redditIcon" from your Assets catalog
+                                                    Image("redditIcon")
                                                         .resizable()
-                                                        .scaledToFill()
+                                                        .scaledToFit()
                                                         .frame(width: 32, height: 32)
                                                         .cornerRadius(4)
-                                                } placeholder: {
-                                                    Image(systemName: "globe")
-                                                        .font(.system(size: 20))
-                                                        .foregroundColor(.indigo)
                                                 }
-                                            }
+                                                // 2) Otherwise, use the normal icon or fallback
+                                                else if let iconURL = link.icon {
+                                                    AsyncImage(url: iconURL) { image in
+                                                        image
+                                                            .resizable()
+                                                            .scaledToFill()
+                                                            .frame(width: 32, height: 32)
+                                                            .cornerRadius(4)
+                                                    } placeholder: {
+                                                        Image(systemName: "globe")
+                                                            .font(.system(size: 20))
+                                                            .foregroundColor(.indigo)
+                                                    }
+                                                }
                                             
                                             VStack(alignment: .leading, spacing: 4) {
                                                 Text(link.title)
@@ -174,50 +200,37 @@ struct FeedList: View {
                                             .frame(maxWidth: .infinity, alignment: .leading)
                                         }
                                         
-                                        
                                         HStack(spacing: 10) {
-                                            
                                             // Like buttons
                                             if link.isLiked {
                                                 Button {
-                                                    
                                                     viewModel.toggleUnlike(post: link)
-                                                    
                                                 } label: {
                                                     Image(systemName: "heart.fill")
                                                         .font(.system(size: 20))
                                                         .foregroundColor(.red)
-                                                    
                                                 }
                                             } else {
                                                 Button {
-                                                    
                                                     viewModel.toggleLike(post: link)
-                                                    
                                                 } label: {
                                                     Image(systemName: "heart")
                                                         .font(.system(size: 20))
                                                         .foregroundColor(.gray)
-                                                    
                                                 }
                                             }
                                             
                                             // Dislike button
                                             Button {
-                                                
                                                 viewModel.toggleDislike(post: link)
-                                                
                                             } label: {
                                                 Image(systemName: "hand.thumbsdown")
                                                     .font(.system(size: 18.5))
                                                     .foregroundColor(.gray)
-                                                
                                             }
                                             
                                             Spacer()
-                                            
                                         }
-                                        
                                     }
                                     .padding(.vertical)
                                     .padding(.horizontal, 18)
@@ -226,26 +239,17 @@ struct FeedList: View {
                                     .cornerRadius(8)
                                     .padding(.horizontal, 20)
                                     .padding(.vertical, 10)
-                                    
-                                    
                                 }
                                 .buttonStyle(.plain)
-                                .onScrollVisibilityChange({ bool in
-                                    //                                            print("Link ID: \(link.title)")
-                                    //                                            print("Last ID: \(viewModel.sourceArray.last!.title)")
-                                    //
-                                    if bool {
-                                        if link.id == viewModel.sourceArray.last!.id {
-                                            viewModel.loadMore()
-                                        }
+                                .onScrollVisibilityChange({ visible in
+                                    if visible, link.id == viewModel.sourceArray.last?.id {
+                                        viewModel.loadMore()
                                     }
-                                    
                                 })
                             }
                         }
                         
                         if viewModel.isLoadingMore {
-                            
                             VStack {
                                 ActivityIndicatorView(isVisible: .constant(true), type: .opacityDots(count: 3, inset: 2))
                                     .frame(width: 32, height: 20)
@@ -256,13 +260,13 @@ struct FeedList: View {
                                     .fontDesign(.rounded)
                             }
                             .padding()
-                            
                         }
                     }
                 }
             }
         }
     }
+    
     private let itemDateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
@@ -270,7 +274,6 @@ struct FeedList: View {
         return formatter
     }()
 }
-
 
 struct LoadingView: View {
     
