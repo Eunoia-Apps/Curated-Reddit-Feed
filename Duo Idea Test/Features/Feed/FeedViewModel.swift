@@ -357,10 +357,11 @@ class FeedViewModel: ObservableObject {
                             """
                         ).generateContent("Categorize this post: \(link.title ?? "")")
                         
+                        let postDate = extractRedditPostDate(from: html) ?? Date() // Fallback to current date if not found
                         var item = SearchItem(
                             title: link.title ?? "No title",
                             link: urlString,
-                            postDate: Date(),
+                            postDate: postDate,
                             category: categoryResponse.text ?? "General",
                             icon: image
                         )
@@ -454,5 +455,32 @@ class FeedViewModel: ObservableObject {
         }
         
         return URL(string: "/favicon.ico", relativeTo: baseURL)
+    }
+    
+    private func extractRedditPostDate(from html: String) -> Date? {
+        do {
+            let document = try HTMLDocument(string: html, encoding: .utf8)
+            
+            // First try to find a <time> tag with a datetime attribute
+            if let timeElement = document.firstChild(xpath: "//time"),
+               let datetime = timeElement.attr("datetime") {
+                let formatter = ISO8601DateFormatter()
+                if let date = formatter.date(from: datetime) {
+                    return date
+                }
+            }
+            
+            // Alternatively, try a meta tag (if available)
+            if let metaElement = document.firstChild(xpath: "//meta[@property='article:published_time']"),
+               let content = metaElement.attr("content") {
+                let formatter = ISO8601DateFormatter()
+                if let date = formatter.date(from: content) {
+                    return date
+                }
+            }
+        } catch {
+            print("Error extracting post date: \(error)")
+        }
+        return nil
     }
 }

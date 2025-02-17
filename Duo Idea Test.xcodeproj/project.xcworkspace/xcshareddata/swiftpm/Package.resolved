@@ -1,5 +1,5 @@
 {
-  "originHash" : "90b492134d12a4b92960d85f820778e707fa0ece4f52bc4610576c31db59418a",
+  "originHash" : "d7fa48c6ab11faee7e777266d586d023a29151139b7bee5ec9508062fc78c3bf",
   "pins" : [
     {
       "identity" : "activityindicatorview",
@@ -119,15 +119,6 @@
       }
     },
     {
-      "identity" : "openai",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/MacPaw/OpenAI.git",
-      "state" : {
-        "revision" : "57059754f93f875f107e576b3a33e27a365c663e",
-        "version" : "0.3.3"
-      }
-    },
-    {
       "identity" : "openai-kit",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/buhe/openai-kit",
@@ -161,15 +152,6 @@
       "state" : {
         "revision" : "39bbd0b5c2662728792ee9be132212e5fd4a49e2",
         "version" : "0.0.16"
-      }
-    },
-    {
-      "identity" : "skeletonui",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/CSolanaM/SkeletonUI.git",
-      "state" : {
-        "revision" : "f025e9ba5d051374d7344efa8859df5b9399a181",
-        "version" : "2.0.2"
       }
     },
     {
@@ -215,15 +197,6 @@
       "state" : {
         "revision" : "671108c96644956dddcd89dd59c203dcdb36cec7",
         "version" : "1.1.4"
-      }
-    },
-    {
-      "identity" : "swift-custom-dump",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/pointfreeco/swift-custom-dump",
-      "state" : {
-        "revision" : "82645ec760917961cfa08c9c0c7104a57a0fa4b1",
-        "version" : "1.3.3"
       }
     },
     {
@@ -308,24 +281,6 @@
       }
     },
     {
-      "identity" : "swift-snapshot-testing",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/pointfreeco/swift-snapshot-testing",
-      "state" : {
-        "revision" : "f5bfff796ee8e3bc9a685b7ffba1bf20663eb370",
-        "version" : "1.18.0"
-      }
-    },
-    {
-      "identity" : "swift-syntax",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/swiftlang/swift-syntax",
-      "state" : {
-        "revision" : "0687f71944021d616d34d922343dcef086855920",
-        "version" : "600.0.1"
-      }
-    },
-    {
       "identity" : "swift-system",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-system.git",
@@ -386,15 +341,6 @@
       "state" : {
         "revision" : "4ce950479707ea109f229d7230ec074a133b15d7",
         "version" : "0.2.1"
-      }
-    },
-    {
-      "identity" : "xctest-dynamic-overlay",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/pointfreeco/xctest-dynamic-overlay",
-      "state" : {
-        "revision" : "b444594f79844b0d6d76d70fbfb3f7f71728f938",
-        "version" : "1.5.1"
       }
     }
   ],

@@ -147,29 +147,31 @@ struct FeedList: View {
                                             .cornerRadius(8)
                                         
                                         HStack(spacing: 12) {
-                                            if link.icon != nil {
-                                                
-                                                AsyncImage(url: link.icon!) { image in
+                                            if let icon = link.icon {
+                                                AsyncImage(url: icon) { image in
                                                     image
                                                         .resizable()
                                                         .scaledToFill()
                                                         .frame(width: 32, height: 32)
                                                         .cornerRadius(4)
-                                                    
                                                 } placeholder: {
                                                     Image(systemName: "globe")
                                                         .font(.system(size: 20))
                                                         .foregroundColor(.indigo)
                                                 }
-                                                
                                             }
                                             
-                                            Text(link.title)
-                                                .font(.headline)
-                                                .fontWeight(.semibold)
-                                                .multilineTextAlignment(.leading)
-                                                .frame(maxWidth: .infinity, alignment: .leading)
-                                            
+                                            VStack(alignment: .leading, spacing: 4) {
+                                                Text(link.title)
+                                                    .font(.headline)
+                                                    .fontWeight(.semibold)
+                                                    .multilineTextAlignment(.leading)
+                                                
+                                                Text(link.postDate, formatter: itemDateFormatter)
+                                                    .font(.subheadline)
+                                                    .foregroundColor(.gray)
+                                            }
+                                            .frame(maxWidth: .infinity, alignment: .leading)
                                         }
                                         
                                         
@@ -261,6 +263,12 @@ struct FeedList: View {
             }
         }
     }
+    private let itemDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        return formatter
+    }()
 }
 
 
