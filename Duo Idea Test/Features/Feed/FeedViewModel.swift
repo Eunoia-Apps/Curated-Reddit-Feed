@@ -13,22 +13,22 @@ import Fuzi
 let topicCategories: [String] = [
     
     // Technology
-        "Artificial Intelligence & Machine Learning",
-        "Blockchain & Cryptocurrency",
-        "Cybersecurity & Data Privacy",
-        "iOS Development & Swift",
-        "Cloud Computing & DevOps",
-        "Biotechnology & Genetic Engineering",
-        "Quantum Computing",
-        "Space Exploration & Aerospace Tech",
-        "Augmented Reality & Virtual Reality",
-        "Automotive Technology & Electric Vehicles",
-        "Renewable Energy & Sustainability",
-        "Gaming Industry & Game Development",
-        "Digital Marketing & SEO",
-        "UX/UI Design & Product Development",
-        "Philosophy of Technology & Ethics",
-        
+    "Artificial Intelligence & Machine Learning",
+    "Blockchain & Cryptocurrency",
+    "Cybersecurity & Data Privacy",
+    "iOS Development & Swift",
+    "Cloud Computing & DevOps",
+    "Biotechnology & Genetic Engineering",
+    "Quantum Computing",
+    "Space Exploration & Aerospace Tech",
+    "Augmented Reality & Virtual Reality",
+    "Automotive Technology & Electric Vehicles",
+    "Renewable Energy & Sustainability",
+    "Gaming Industry & Game Development",
+    "Digital Marketing & SEO",
+    "UX/UI Design & Product Development",
+    "Philosophy of Technology & Ethics",
+    
     // Business
     "Stock Market & Investment Strategies",
     "Entrepreneurship & Startups",
@@ -38,7 +38,7 @@ let topicCategories: [String] = [
     "Marketing Strategies & Branding",
     "Supply Chain & Logistics",
     "Real Estate & Property Investment",
-
+    
     // Health
     "Mental Health & Wellness",
     "Nutrition & Dietetics",
@@ -48,7 +48,7 @@ let topicCategories: [String] = [
     "Public Health & Epidemiology",
     "Sleep Science & Optimization",
     "Neuroscience & Cognitive Health",
-
+    
     // Education
     "EdTech & Online Learning",
     "STEM Education & Innovation",
@@ -58,7 +58,7 @@ let topicCategories: [String] = [
     "Study Techniques & Productivity",
     "Education Policy & Reform",
     "AI in Education & Personalized Learning",
-
+    
     // Entertainment
     "Film & Television Industry",
     "Music Production & Trends",
@@ -68,7 +68,7 @@ let topicCategories: [String] = [
     "Animation & Visual Effects",
     "Podcasting & Audio Storytelling",
     "Comedy & Stand-Up Culture",
-
+    
     // Sports
     "Soccer & International Football",
     "Basketball & NBA Trends",
@@ -78,7 +78,7 @@ let topicCategories: [String] = [
     "Extreme Sports & Adventure Challenges",
     "Fitness Competitions & Bodybuilding",
     "Sports Science & Injury Prevention",
-
+    
     // Lifestyle
     "Minimalism & Decluttering",
     "Personal Development & Mindfulness",
@@ -88,7 +88,7 @@ let topicCategories: [String] = [
     "Work-Life Balance & Productivity",
     "Hobbies & Creative Arts",
     "Self-Care & Mental Resilience",
-
+    
     // Travel
     "Backpacking & Budget Travel",
     "Luxury Travel & Resorts",
@@ -98,7 +98,7 @@ let topicCategories: [String] = [
     "Eco-Tourism & Sustainable Travel",
     "Best Cities for Remote Work",
     "Airlines & Travel Hacks",
-
+    
     // Food
     "Gourmet Cooking & Fine Dining",
     "Street Food & Local Cuisines",
@@ -224,7 +224,7 @@ class FeedViewModel: ObservableObject {
     @AppStorage("SerperAPIKey") var serperApiKey = "0d34a8e70e5fa38a3f3371169678d8eb6c93c96a"
     
     @Published var viewState: SearchState = .input
-  
+    
     @Published var model: GenerativeModel?
     @AppStorage("keywords") var keywords: String = ""
     @Published var answer: String = ""
@@ -268,7 +268,7 @@ class FeedViewModel: ObservableObject {
             isLoadingMore = true
         }
         
-       
+        
         Task(priority: .high) {
             do {
                 
@@ -339,12 +339,39 @@ class FeedViewModel: ObservableObject {
                     for link in organic {
                         guard let urlString = link.link, let url = URL(string: urlString) else { continue }
                         
-                        let data = try? await URLSession.shared.data(for: URLRequest(url: url, timeoutInterval: 15))
+//                        let data = try? await URLSession.shared.data(for: URLRequest(url: url, timeoutInterval: 15))
+//                        
+//                        guard let html = data.flatMap({ String(data: $0.0, encoding: .utf8) }) else { continue }
+//                        
+//                        let image = extractFaviconURL(from: html, baseURL: url)
                         
-                        guard let html = data.flatMap({ String(data: $0.0, encoding: .utf8) }) else { continue }
+                        var postDate: Date? = nil
                         
-                        let doc = try? HTMLDocument(string: html, encoding: .utf8)
-                        let image = extractFaviconURL(from: html, baseURL: url)
+                        if let host = url.host, host.contains("reddit.com") {
+                            // Append ".json" if not already there.
+                            let jsonURLString = url.absoluteString.hasSuffix(".json") ? url.absoluteString : url.absoluteString + ".json"
+                            if let jsonURL = URL(string: jsonURLString) {
+                                do {
+                                    let (jsonData, _) = try await URLSession.shared.data(for: URLRequest(url: jsonURL, timeoutInterval: 15))
+                                    if let jsonObject = try JSONSerialization.jsonObject(with: jsonData, options: []) as? [Any],
+                                       let firstItem = jsonObject.first as? [String: Any],
+                                       let dataDict = firstItem["data"] as? [String: Any],
+                                       let children = dataDict["children"] as? [[String: Any]],
+                                       let firstChild = children.first,
+                                       let childData = firstChild["data"] as? [String: Any],
+                                       let createdUTC = childData["created_utc"] as? TimeInterval {
+                                        
+                                        postDate = Date(timeIntervalSince1970: createdUTC)
+                                        print("Parsed date from JSON: \(postDate!)")
+                                    }
+                                } catch {
+                                    print("Error fetching JSON for post date: \(error)")
+                                }
+                            }
+                        }
+                        
+                        
+                        
                         
                         let categoryResponse = try await GenerativeModel(
                             name: "gemini-2.0-flash-lite-preview",
@@ -352,18 +379,17 @@ class FeedViewModel: ObservableObject {
                             generationConfig: GenerationConfig(temperature: 0.3),
                             safetySettings: safetySettings, systemInstruction: """
                                You are an AI responsible for categorizing Reddit posts using the predefined topic list: \(topicCategories).
-
+                            
                                Give me ONLY a single category from this list—nothing else. Do not provide explanations, additional context, or categories that are not explicitly included in the list.
                             """
                         ).generateContent("Categorize this post: \(link.title ?? "")")
                         
-                        let postDate = extractRedditPostDate(from: html) ?? Date() // Fallback to current date if not found
+                        
                         var item = SearchItem(
                             title: link.title ?? "No title",
                             link: urlString,
-                            postDate: postDate,
-                            category: categoryResponse.text ?? "General",
-                            icon: image
+                            postDate: postDate ?? Date(),
+                            category: categoryResponse.text ?? "General"
                         )
                         print("\nTitle: " + link.title!)
                         print("Category: " + categoryResponse.text! + "\n")
@@ -424,9 +450,9 @@ class FeedViewModel: ObservableObject {
                 currentPage += 1
                 isLoadingMore = false
                 
-//                withAnimation(.smooth(duration: 0.3)) {
-//                    viewState = .success
-//                }
+                //                withAnimation(.smooth(duration: 0.3)) {
+                //                    viewState = .success
+                //                }
                 
                 
             } catch {

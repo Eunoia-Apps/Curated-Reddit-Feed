@@ -147,19 +147,6 @@ struct FeedList: View {
                                             .cornerRadius(8)
                                         
                                         HStack(spacing: 12) {
-                                            if let icon = link.icon {
-                                                AsyncImage(url: icon) { image in
-                                                    image
-                                                        .resizable()
-                                                        .scaledToFill()
-                                                        .frame(width: 32, height: 32)
-                                                        .cornerRadius(4)
-                                                } placeholder: {
-                                                    Image(systemName: "globe")
-                                                        .font(.system(size: 20))
-                                                        .foregroundColor(.indigo)
-                                                }
-                                            }
                                             
                                             VStack(alignment: .leading, spacing: 4) {
                                                 Text(link.title)
@@ -290,11 +277,6 @@ struct LoadingView: View {
                         .shimmerEffect(isLoading: .constant(true))
                     
                     HStack(spacing: 12) {
-                        
-                        Image(systemName: "globe")
-                            .font(.system(size: 24))
-                            .redacted(reason: .placeholder)
-                            .shimmerEffect(isLoading: .constant(true))
                         
                         Text("placeholder placeholder placeholder placeholder placeholder placeholders")
                             .font(.headline)
