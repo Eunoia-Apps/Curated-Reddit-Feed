@@ -66,11 +66,10 @@ struct FeedView: View {
             }
             .onAppear {
                 
-                print(viewModel.viewState)
-                if viewModel.viewState != .success {
+                if !viewModel.keywords.isEmpty && viewModel.viewState != .success {
                     viewModel.fetch()
                 }
-                
+             
             }
             
         }
