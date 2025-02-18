@@ -8,6 +8,22 @@
 import SwiftUI
 import ActivityIndicatorView
 import ChatField
+import WebKit
+
+// MARK: - WebView for WKWebView Sheet
+struct WebView: UIViewRepresentable {
+    let url: URL
+    
+    func makeUIView(context: Context) -> WKWebView {
+        return WKWebView()
+    }
+    
+    func updateUIView(_ uiView: WKWebView, context: Context) {
+        let request = URLRequest(url: url)
+        uiView.load(request)
+    }
+}
+
 
 
 struct FeedView: View {
@@ -148,12 +164,12 @@ struct InputView: View {
 struct FeedList: View {
     
     @ObservedObject var viewModel: FeedViewModel
-    @State private var showSummarySheet = false
     @StateObject private var summaryVM = FeedSummaryViewModel()
-    @State private var settingsDetent = PresentationDetent.fraction(0.2)
+    
+    // Use an enum to manage which sheet is active
+    @State private var activeSheet: ActiveSheet? = nil
     
     var body: some View {
-            
         ZStack(alignment: .bottom) {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 10) {
@@ -162,29 +178,29 @@ struct FeedList: View {
                         LazyVStack {
                             ForEach(viewModel.sourceArray) { link in
                                 
-                                
                                 VStack(spacing: 16) {
-                                    
-                                    Link(destination: URL(string: link.link)!) {
+                                    // Replacing the browser Link with a Button that opens a WebKit sheet.
+                                    Button {
+                                        if let url = URL(string: link.link) {
+                                            activeSheet = .webView(url)
+                                        }
+                                    } label: {
                                         VStack(spacing: 0) {
                                             
-                                            
                                             VStack {
-                                                
                                                 // Thumbnail image in place of the gray rectangle.
                                                 if let thumbnail = link.thumbnail {
                                                     AsyncImage(url: thumbnail) { image in
                                                         image
                                                             .resizable()
-                                                            .scaledToFill() // Ensures the image fits inside the frame without expansion
-                                                            .frame(maxWidth: .infinity, maxHeight: 164) // Keeps it contained
-                                                            .clipped() // Prevents any overflow
+                                                            .scaledToFill()
+                                                            .frame(maxWidth: .infinity, maxHeight: 164)
+                                                            .clipped()
                                                             .cornerRadius(8)
-                                                        
                                                     } placeholder: {
                                                         Rectangle()
                                                             .fill(Color.gray.opacity(0.1))
-                                                            .frame(height: 164) // Matches the expected size
+                                                            .frame(height: 164)
                                                             .cornerRadius(8)
                                                     }
                                                 }
@@ -196,8 +212,7 @@ struct FeedList: View {
                                                     .frame(maxWidth: .infinity, alignment: .leading)
                                                     .padding(.top, 4)
                                                 
-                                                if link.thumbnail == nil && link.text.isEmpty == false {
-                                                    
+                                                if link.thumbnail == nil && !link.text.isEmpty {
                                                     Text(link.text)
                                                         .font(.subheadline)
                                                         .multilineTextAlignment(.leading)
@@ -225,7 +240,6 @@ struct FeedList: View {
                                             .padding()
                                             .background(.white)
                                             
-                                            
                                             HStack(spacing: 4) {
                                                 Text("Reddit")
                                                     .font(.subheadline)
@@ -249,6 +263,7 @@ struct FeedList: View {
                                                 .stroke(.primary.opacity(0.1), lineWidth: 1)
                                         }
                                     }
+                                    .buttonStyle(.plain)
                                     
                                     HStack(spacing: 10) {
                                         // Like buttons
@@ -279,9 +294,10 @@ struct FeedList: View {
                                                 .foregroundColor(.gray)
                                         }
                                         
+                                        // Summary button opens the summary sheet
                                         Button {
                                             summaryVM.sumWeb(post: link)
-                                            showSummarySheet = true
+                                            activeSheet = .summary
                                         } label: {
                                             Image(systemName: "text.bubble")
                                                 .font(.system(size: 20))
@@ -324,32 +340,42 @@ struct FeedList: View {
                 }
             }
         }
-        .sheet(isPresented: $showSummarySheet) {
-            
-            VStack(spacing: 0.1) {
-                Rectangle()
-                    .foregroundColor(.gray.opacity(0.4))
-                    .frame(width: 60, height: 5)
-                    .cornerRadius(20)
-                    .padding(.vertical, 10)
-                
-                Divider()
-                    .opacity(0.5)
-                
-                Spacer()
-                
-                ScrollView {
-                    Text("Post Summary")
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                        .fontDesign(.rounded)
-                        .padding(.vertical, 12)
-                    
-                    FeedSummaryView(viewModel: summaryVM)
+        // Single sheet modifier that switches on the active sheet type.
+        .sheet(item: $activeSheet) { sheet in
+            switch sheet {
+            case .webView(let url):
+                NavigationView {
+                    WebView(url: url)
+                        .navigationBarTitle("", displayMode: .inline)
+                        .navigationBarItems(leading: Button("Close") {
+                            activeSheet = nil
+                        })
                 }
+            case .summary:
+                VStack(spacing: 0.1) {
+                    Rectangle()
+                        .foregroundColor(.gray.opacity(0.4))
+                        .frame(width: 60, height: 5)
+                        .cornerRadius(20)
+                        .padding(.vertical, 10)
+                    
+                    Divider()
+                        .opacity(0.5)
+                    
+                    Spacer()
+                    
+                    ScrollView {
+                        Text("Post Summary")
+                            .font(.title3)
+                            .fontWeight(.semibold)
+                            .fontDesign(.rounded)
+                            .padding(.vertical, 12)
+                        
+                        FeedSummaryView(viewModel: summaryVM)
+                    }
+                }
+                .presentationDetents([.fraction(0.5)])
             }
-            .presentationDetents([.fraction(0.5)])
-            
         }
     }
     
@@ -359,6 +385,19 @@ struct FeedList: View {
         formatter.timeStyle = .short
         return formatter
     }()
+    
+    // Enum to handle which sheet is active.
+    enum ActiveSheet: Identifiable, Equatable {
+        case summary
+        case webView(URL)
+        
+        var id: Int {
+            switch self {
+            case .summary: return 0
+            case .webView(_): return 1
+            }
+        }
+    }
 }
 
 
