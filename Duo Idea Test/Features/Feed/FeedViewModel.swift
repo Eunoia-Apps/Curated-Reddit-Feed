@@ -220,7 +220,7 @@ class FeedViewModel: ObservableObject {
     // UserDefaults storage
     static let userDefaults = UserDefaults(suiteName: "group.demo.app")!
     
-    @AppStorage("GeminiAPIKey") var apiKey = "AIzaSyBRb2joOU4_8KWWiJn2MhL1IS_Tm6-Q8Zo"
+    @AppStorage("GeminiAPIKey") var apiKey = "AIzaSyDawRzTtS5kG-fO53AB644r3U8qoJLgHJQ"
     @AppStorage("SerperAPIKey") var serperApiKey = "0d34a8e70e5fa38a3f3371169678d8eb6c93c96a"
     
     @Published var viewState: SearchState = .input
@@ -304,6 +304,8 @@ class FeedViewModel: ObservableObject {
                     }
                 }
                 
+                array = ["r/technology"]
+                
                 if array.count >= 3 {
                     linkCount = 3
                 } else if array.count == 2 {
@@ -343,43 +345,57 @@ class FeedViewModel: ObservableObject {
                         var title: String = link.title ?? "No title"
                         var author: String = ""
                         //var subredditName: String = ""
-                        //var score: Int = 0
-                       //var numComments: Int = 0
+                        var score: Int = 0
                         var thumbnail: URL? = nil
+                        var bodyText = ""
                         var postDate: Date? = nil
                         let postURL: String = urlString
+                        var comments: [String] = []
                         
                         if let host = url.host, host.contains("reddit.com") {
-                            // Append ".json" if necessary.
+                            // Append ".json" if necessary.
                             let jsonURLString = url.absoluteString.hasSuffix(".json") ? url.absoluteString : url.absoluteString + ".json"
-                            if let jsonURL = URL(string: jsonURLString),
-                               let (jsonData, _) = try? await URLSession.shared.data(for: URLRequest(url: jsonURL, timeoutInterval: 15)),
-                               let jsonArray = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [Any],
-                               let firstItem = jsonArray.first as? [String: Any],
-                               let dataDict = firstItem["data"] as? [String: Any],
-                               let children = dataDict["children"] as? [[String: Any]],
-                               let firstChild = children.first,
-                               let childData = firstChild["data"] as? [String: Any] {
-                                
-                                title = childData["title"] as? String ?? title
-                                author = childData["author"] as? String ?? ""
-                                //subredditName = childData["subreddit"] as? String ?? ""
-                                //score = childData["score"] as? Int ?? 0
-                                //numComments = childData["num_comments"] as? Int ?? 0
-                                if let createdUTC = childData["created_utc"] as? TimeInterval {
-                                    postDate = Date(timeIntervalSince1970: createdUTC)
-                                }
-                                if let thumbString = childData["thumbnail"] as? String,
-                                   !thumbString.isEmpty,
-                                   thumbString.lowercased() != "self",
-                                   thumbString.lowercased() != "default",
-                                   let thumbURL = URL(string: thumbString) {
-                                    thumbnail = thumbURL
-                                }
-                                
-                                print("Parsed from JSON – Title: \(title), Author: \(author)")
-                                print("Post Date: \(postDate?.description ?? "nil"), Thumbnail: \(thumbnail?.absoluteString ?? "none")")
-                            }
+                            if let jsonURL = URL(string: jsonURLString),
+                               let (jsonData, _) = try? await URLSession.shared.data(for: URLRequest(url: jsonURL, timeoutInterval: 15)),
+                               let jsonArray = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [Any],
+                               let firstItem = jsonArray.first as? [String: Any],
+                               let dataDict = firstItem["data"] as? [String: Any],
+                               let children = dataDict["children"] as? [[String: Any]],
+                               let firstChild = children.first,
+                               let childData = firstChild["data"] as? [String: Any] {
+                                
+                                title = childData["title"] as? String ?? title
+                                author = childData["author"] as? String ?? ""
+                            score = childData["score"] as? Int ?? 0
+                                
+                                // Extract the post body (if applicable)
+                                bodyText = childData["selftext"] as? String ?? ""
+                                
+                                // Extract comments body (if applicable)
+                               
+                                if let secondItem = jsonArray.dropFirst().first as? [String: Any],
+                                   let commentsData = secondItem["data"] as? [String: Any],
+                                   let commentsChildren = commentsData["children"] as? [[String: Any]] {
+                                    comments = commentsChildren.compactMap { ($0["data"] as? [String: Any])?["body"] as? String }
+                                }
+                                
+                                if let createdUTC = childData["created_utc"] as? TimeInterval {
+                                    postDate = Date(timeIntervalSince1970: createdUTC)
+                                }
+                            
+                                if let thumbString = childData["thumbnail"] as? String,
+                                   !thumbString.isEmpty,
+                                   thumbString.lowercased() != "self",
+                                   thumbString.lowercased() != "default",
+                                   let thumbURL = URL(string: thumbString) {
+                                    thumbnail = thumbURL
+                                }
+                                
+                                print("Parsed from JSON – Title: \(title), Author: \(author)")
+                                print("Post Date: \(postDate?.description ?? "nil"), Thumbnail: \(thumbnail?.absoluteString ?? "none")")
+                                print("Post Body: \(bodyText)")
+                                print("Comments: \(comments)")
+                            }
                         }
                         
                      
@@ -400,9 +416,12 @@ class FeedViewModel: ObservableObject {
                         var item = SearchItem(
                             title: title,
                             link: postURL,
-                            postDate: postDate!, // now hopefully extracted from JSON (or fallback)
+                            postDate: postDate ?? Date(), // now hopefully extracted from JSON (or fallback)
                             category: categoryResponse.text ?? "General",
-                            icon: thumbnail
+                            thumbnail: thumbnail,
+                            commentCount: comments.count,
+                            upvoteCount: score,
+                            text: bodyText
                         )
                         
                         print("\nFinal Item – Title: \(title), Category: \(categoryResponse.text ?? "General")\n")
@@ -462,7 +481,7 @@ class FeedViewModel: ObservableObject {
             } catch {
                 isLoadingMore = false
                 self.error = "\(error)"
-                errorMessage = "Error loading content"
+                errorMessage = "\(error)"
                 
                 withAnimation(.smooth(duration: 0.3)) {
                     viewState = .error

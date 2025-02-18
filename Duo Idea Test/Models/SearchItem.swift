@@ -14,10 +14,15 @@ struct SearchItem: Codable, Identifiable {
     let link: String
     var postDate: Date
     var aiScore: Double = 0.0
+    
     var isLiked: Bool = false
     var isDisliked: Bool = false
     var category: String = ""
-    var icon: URL?
+    
+    var thumbnail: URL?
+    var commentCount: Int = 0
+    var upvoteCount: Int = 0
+    var text: String = ""
 }
 
 

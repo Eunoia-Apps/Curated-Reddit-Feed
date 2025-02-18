@@ -69,7 +69,7 @@ struct FeedView: View {
                 if !viewModel.keywords.isEmpty && viewModel.viewState != .success {
                     viewModel.fetch()
                 }
-             
+                
             }
             
         }
@@ -137,91 +137,140 @@ struct FeedList: View {
                         LazyVStack {
                             ForEach(viewModel.sourceArray) { link in
                                 
-                                Link(destination: URL(string: link.link)!) {
-                                    VStack(spacing: 16) {
-                                        // Thumbnail image in place of the gray rectangle.
-                                        if let thumbnail = link.icon {
-                                            AsyncImage(url: thumbnail) { image in
-                                                image
-                                                    .resizable()
-                                                    .scaledToFit() // Ensures the image fits inside the frame without expansion
-                                                    .frame(maxWidth: .infinity, maxHeight: 200) // Keeps it contained
-                                                    .clipped() // Prevents any overflow
-                                                    .cornerRadius(8)
-                                            } placeholder: {
-                                                Rectangle()
-                                                    .fill(Color.gray.opacity(0.1))
-                                                    .frame(height: 200) // Matches the expected size
-                                                    .cornerRadius(8)
-                                            }
-                                        } else {
-                                            Rectangle()
-                                                .fill(Color.gray.opacity(0.1))
-                                                .frame(height: 200) // Ensures consistent height
-                                                .cornerRadius(8)
-                                        }
-                                        
-                                        
-                                          
-                                        VStack(alignment: .leading, spacing: 4) {
-                                            Text(link.title)
-                                                .font(.headline)
-                                                .fontWeight(.semibold)
-                                                .multilineTextAlignment(.leading)
+                                
+                                VStack(spacing: 16) {
+                                    
+                                    Link(destination: URL(string: link.link)!) {
+                                        VStack(spacing: 0) {
                                             
-                                            Text(link.postDate, formatter: itemDateFormatter)
-                                                .font(.subheadline)
-                                                .foregroundColor(.gray)
-                                        }
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        
-                                        
-                                        HStack(spacing: 10) {
-                                            // Like buttons
-                                            if link.isLiked {
-                                                Button {
-                                                    viewModel.toggleUnlike(post: link)
-                                                } label: {
-                                                    Image(systemName: "heart.fill")
-                                                        .font(.system(size: 20))
-                                                        .foregroundColor(.red)
-                                                }
-                                            } else {
-                                                Button {
-                                                    viewModel.toggleLike(post: link)
-                                                } label: {
-                                                    Image(systemName: "heart")
-                                                        .font(.system(size: 20))
-                                                        .foregroundColor(.gray)
-                                                }
-                                            }
                                             
-                                            // Dislike button
-                                            Button {
-                                                viewModel.toggleDislike(post: link)
-                                            } label: {
-                                                Image(systemName: "hand.thumbsdown")
-                                                    .font(.system(size: 18.5))
+                                            VStack {
+                                                
+                                                // Thumbnail image in place of the gray rectangle.
+                                                if let thumbnail = link.thumbnail {
+                                                    AsyncImage(url: thumbnail) { image in
+                                                        image
+                                                            .resizable()
+                                                            .scaledToFill() // Ensures the image fits inside the frame without expansion
+                                                            .frame(maxWidth: .infinity, maxHeight: 164) // Keeps it contained
+                                                            .clipped() // Prevents any overflow
+                                                            .cornerRadius(8)
+                                                        
+                                                    } placeholder: {
+                                                        Rectangle()
+                                                            .fill(Color.gray.opacity(0.1))
+                                                            .frame(height: 164) // Matches the expected size
+                                                            .cornerRadius(8)
+                                                    }
+                                                }
+                                                
+                                                Text(link.title)
+                                                    .font(.headline)
+                                                    .fontWeight(.semibold)
+                                                    .multilineTextAlignment(.leading)
+                                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                                    .padding(.top, 4)
+                                                
+                                                if link.thumbnail == nil && link.text.isEmpty == false {
+                                                    
+                                                    Text(link.text)
+                                                        .font(.subheadline)
+                                                        .multilineTextAlignment(.leading)
+                                                        .lineLimit(4)
+                                                        .padding(.vertical, 6)
+                                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                                }
+                                                
+                                                HStack(spacing: 4) {
+                                                    Image(systemName: "arrowshape.up")
+                                                    
+                                                    Text("\(link.upvoteCount)")
+                                                        .padding(.trailing, 8)
+                                                    
+                                                    Image(systemName: "bubble")
+                                                    
+                                                    Text("\(link.commentCount)")
+                                                    
+                                                    Spacer()
+                                                }
+                                                .fontDesign(.rounded)
+                                                .padding(.top, 4)
+                                            }
+                                            .frame(maxWidth: .infinity)
+                                            .padding()
+                                            .background(.white)
+                                            
+                                            
+                                            HStack(spacing: 4) {
+                                                Text("Reddit")
+                                                    .font(.subheadline)
+                                                    .foregroundColor(.gray)
+                                                
+                                                Spacer()
+                                                
+                                                Text(link.postDate, formatter: itemDateFormatter)
+                                                    .font(.subheadline)
                                                     .foregroundColor(.gray)
                                             }
+                                            .padding(.vertical, 6)
+                                            .padding(.horizontal)
+                                            .frame(maxWidth: .infinity)
                                             
-                                            Spacer()
+                                        }
+                                        .background(.gray.opacity(0.09))
+                                        .cornerRadius(8)
+                                        .overlay {
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(.primary.opacity(0.1), lineWidth: 1)
                                         }
                                     }
-                                    .padding(.vertical)
-                                    .padding(.horizontal, 18)
-                                    .frame(maxWidth: .infinity)
-                                    .background(Color.gray.opacity(0.1))
-                                    .cornerRadius(8)
-                                    .padding(.horizontal, 20)
-                                    .padding(.vertical, 10)
+                                    
+                                    HStack(spacing: 10) {
+                                        // Like buttons
+                                        if link.isLiked {
+                                            Button {
+                                                viewModel.toggleUnlike(post: link)
+                                            } label: {
+                                                Image(systemName: "heart.fill")
+                                                    .font(.system(size: 20))
+                                                    .foregroundColor(.red)
+                                            }
+                                        } else {
+                                            Button {
+                                                viewModel.toggleLike(post: link)
+                                            } label: {
+                                                Image(systemName: "heart")
+                                                    .font(.system(size: 20))
+                                                    .foregroundColor(.gray)
+                                            }
+                                        }
+                                        
+                                        // Dislike button
+                                        Button {
+                                            viewModel.toggleDislike(post: link)
+                                        } label: {
+                                            Image(systemName: "hand.thumbsdown")
+                                                .font(.system(size: 18.5))
+                                                .foregroundColor(.gray)
+                                        }
+                                        
+                                        Spacer()
+                                    }
                                 }
+                                .padding(.vertical)
+                                .padding(.horizontal, 18)
+                                .frame(maxWidth: .infinity)
+                                .background(Color.gray.opacity(0.07))
+                                .cornerRadius(8)
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 10)
                                 .buttonStyle(.plain)
                                 .onScrollVisibilityChange({ visible in
                                     if visible, link.id == viewModel.sourceArray.last?.id {
                                         viewModel.loadMore()
                                     }
                                 })
+                                
                             }
                         }
                         
@@ -230,7 +279,7 @@ struct FeedList: View {
                                 ActivityIndicatorView(isVisible: .constant(true), type: .opacityDots(count: 3, inset: 2))
                                     .frame(width: 32, height: 20)
                                 
-                                Text("Fetching your posts")
+                                Text("Fetching posts")
                                     .font(.caption2)
                                     .fontWeight(.medium)
                                     .fontDesign(.rounded)
@@ -261,68 +310,102 @@ struct LoadingView: View {
             ForEach(0..<8) { _ in
                 VStack(spacing: 16) {
                     
-                    Rectangle()
-                        .fill(Color.gray.opacity(0.3))
-                        .frame(height: 200)
-                        .cornerRadius(8)
-                        .redacted(reason: .placeholder)
-                        .shimmerEffect(isLoading: .constant(true))
                     
-                    HStack(spacing: 12) {
+                    VStack(spacing: 0) {
                         
-                        Text("placeholder placeholder placeholder placeholder placeholder placeholders")
-                            .font(.headline)
-                            .fontWeight(.semibold)
-                            .multilineTextAlignment(.leading)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .redacted(reason: .placeholder)
-                            .shimmerEffect(isLoading: .constant(true))
                         
+                        VStack {
+                            
+                            
+                            Rectangle()
+                                .fill(Color.gray.opacity(0.12))
+                                .frame(height: 164) // Matches the expected size
+                                .cornerRadius(8)
+                                .shimmerEffect(isLoading: .constant(true))
+                            
+                            
+                            Rectangle()
+                                .fill(Color.gray.opacity(0.12))
+                                .frame(height: 10) // Matches the expected size
+                                .cornerRadius(2)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .shimmerEffect(isLoading: .constant(true))
+                                .padding(.top, 4)
+                            
+                            Rectangle()
+                                .fill(Color.gray.opacity(0.12))
+                                .frame(height: 10) // Matches the expected size
+                                .cornerRadius(2)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .shimmerEffect(isLoading: .constant(true))
+                                .padding(.top, 2)
+                            
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(.white)
+                        
+                        
+                        HStack(spacing: 4) {
+                            Text("placeholder")
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                                .opacity(0)
+                            
+                            Spacer()
+                            
+                            Text("placeholder")
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                                .opacity(0)
+                        }
+                        .padding(.vertical, 6)
+                        .padding(.horizontal)
+                        .frame(maxWidth: .infinity)
+                        
+                        
+                    }
+                    .background(.gray.opacity(0.09))
+                    .cornerRadius(8)
+                    .redacted(reason: .placeholder).overlay {
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(.primary.opacity(0.1), lineWidth: 1)
                     }
                     
                     
-                    
-                    
                     HStack(spacing: 10) {
-                        
                         // Like buttons
                         
                         Button {
-                            
-                            
                             
                         } label: {
                             Image(systemName: "heart")
                                 .font(.system(size: 20))
                                 .foregroundColor(.gray)
-                            
                         }
                         
                         
-                        
+                        // Dislike button
                         Button {
-                            
-                            
                             
                         } label: {
                             Image(systemName: "hand.thumbsdown")
                                 .font(.system(size: 18.5))
                                 .foregroundColor(.gray)
-                            
                         }
                         
                         Spacer()
-                        
                     }
-                    
                 }
                 .padding(.vertical)
                 .padding(.horizontal, 18)
                 .frame(maxWidth: .infinity)
-                .background(Color.gray.opacity(0.1))
+                .background(Color.gray.opacity(0.07))
                 .cornerRadius(8)
                 .padding(.horizontal, 20)
                 .padding(.vertical, 10)
+                .buttonStyle(.plain)
+                
                 
             }
             
@@ -339,15 +422,14 @@ struct ErrorView: View {
     var body: some View {
         VStack {
             
-            Text("An error occurred: try restarting the app.")
+            Text("Error Description:")
                 .font(.subheadline)
-                .padding()
+                .fontWeight(.medium)
             
             Text(viewModel.errorMessage)
                 .font(.subheadline)
                 .padding(20)
             
-            //                        ReportButton(message: Message(text: "gemsearch-error", isCurrentUser: false, hasError: true, apikeyUsed: viewModel.enableCustomAPIKey ? "user-custom-key" : viewModel.apiKey, errorMessage: "GemSearch ERROR: \(viewModel.error)"))
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
