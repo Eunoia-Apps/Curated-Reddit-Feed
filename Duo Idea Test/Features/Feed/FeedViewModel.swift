@@ -332,7 +332,7 @@ class FeedViewModel: ObservableObject {
                     let decoder = JSONDecoder()
                     let serperResult = try decoder.decode(SerperResult.self, from: data.0)
                     
-                    guard let organic = serperResult.organic else { throw "Missing API Data" }
+                    guard let organic = serperResult.organic else { continue }
                     
                     print("\nLink Count for \(subreddit): \(organic.count)\n")
                     
