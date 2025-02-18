@@ -15,9 +15,6 @@ struct FeedView: View {
     
     @StateObject var viewModel = FeedViewModel()
     
-    @FocusState private var isFieldFocused: Bool
-    
-    
     var body: some View {
         NavigationStack {
             VStack {
@@ -272,6 +269,8 @@ struct FeedList: View {
                                         Button {
                                             summaryVM.sumWeb(post: link)
                                             activeSheet = .summary
+                                            
+                                            print("\(link.link)")
                                         } label: {
                                             Image(systemName: "text.bubble")
                                                 .font(.system(size: 20))

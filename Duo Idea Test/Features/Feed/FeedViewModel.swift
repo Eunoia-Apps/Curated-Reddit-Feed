@@ -341,7 +341,11 @@ class FeedViewModel: ObservableObject {
                     
                     
                     for link in organic {
-                        guard let urlString = link.link, let url = URL(string: urlString) else { continue }
+                        guard var urlString = link.link else { continue }
+                                
+                        urlString = normalizeRedditURL(urlString)
+                        
+                        guard let url = URL(string: urlString) else { continue }
                         
                         // Try to get the post date (and other data) from Reddit's JSON endpoint
                         var title: String = link.title ?? "No title"
@@ -475,11 +479,7 @@ class FeedViewModel: ObservableObject {
                 
                 currentPage += 1
                 isLoadingMore = false
-                
                 waiting = false
-//                withAnimation(.smooth(duration: 0.3)) {
-//                    viewState = .success
-//                }
                 
                 
             } catch {
@@ -531,6 +531,18 @@ class FeedViewModel: ObservableObject {
         
         return URL(string: "/favicon.ico", relativeTo: baseURL)
     }
+    
+    private func normalizeRedditURL(_ url: String) -> String {
+        let pattern = "^https?://old\\.reddit\\.com(.*)"
+        if let regex = try? NSRegularExpression(pattern: pattern, options: []) {
+            let range = NSRange(location: 0, length: url.utf16.count)
+            if regex.firstMatch(in: url, options: [], range: range) != nil {
+                return url.replacingOccurrences(of: "old.reddit.com", with: "reddit.com")
+            }
+        }
+        return url
+    }
+
     
     private func extractRedditPostDate(from html: String) -> Date? {
         // Regex to find: "created_timestamp":"2025-02-17T16:08:09.946000+0000"
