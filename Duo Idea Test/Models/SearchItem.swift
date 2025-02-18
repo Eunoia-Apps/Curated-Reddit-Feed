@@ -80,7 +80,13 @@ extension SearchItem {
         let recencyScore = max(0, 50 - daysSincePost)
         score += recencyScore
         
-        // Factor 3: How many times the post's category has been liked
+        let voteScore = (self.upvoteCount * 3/2)
+        score += Double(voteScore)
+        
+        let commentScore = (self.commentCount * 3/2)
+        score += Double(commentScore)
+        
+        // Factor 3: How many times the post's category has been liked by user
         
         if let currentCount = AlgorithmCore.shared.likedCategories[self.category] {
             score += Double((currentCount * 3/2))

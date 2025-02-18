@@ -352,7 +352,8 @@ class FeedViewModel: ObservableObject {
                         let postURL: String = urlString
                         var comments: [String] = []
                         
-                        if let host = url.host, host.contains("reddit.com") {
+                        if let host = url.host {
+                            
                             // Append ".json" if necessary.
                             let jsonURLString = url.absoluteString.hasSuffix(".json") ? url.absoluteString : url.absoluteString + ".json"
                             if let jsonURL = URL(string: jsonURLString),
