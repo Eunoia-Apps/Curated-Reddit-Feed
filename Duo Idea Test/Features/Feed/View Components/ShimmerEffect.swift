@@ -27,7 +27,7 @@ struct ShimmerEffect: Animatable, ViewModifier {
     private let max = 1.5
     
     
-    public static let defaultGradient: Gradient = Gradient(colors: [.gray.opacity(0.4), .primary.opacity(0.3), .gray.opacity(0.4)])
+    public static let defaultGradient: Gradient = Gradient(colors: [.gray.opacity(0.4), .primary.opacity(0.4), .gray.opacity(0.5)])
     public static let defaultAnimation = Animation.linear(duration: 1.25).repeatForever(autoreverses: false)
     public static let defaultAngle = Angle.degrees(0.0)
     

@@ -303,9 +303,7 @@ class FeedViewModel: ObservableObject {
                         print("Error parsing response: \(error)")
                     }
                 }
-                
-                array = ["r/technology"]
-                
+                                
                 if array.count >= 3 {
                     linkCount = 3
                 } else if array.count == 2 {

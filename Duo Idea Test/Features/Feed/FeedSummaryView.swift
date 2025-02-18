@@ -1,5 +1,5 @@
 //
-//  WebSummaryView.swift
+//  FeedSummaryView.swift
 //  Duo Idea Test
 //
 //  Created by David Empire on 2/17/25.
@@ -23,7 +23,7 @@ enum ToolState {
 
 
 @MainActor
-class WebSummaryViewModel: ObservableObject {
+class FeedSummaryViewModel: ObservableObject {
         
     @Published var viewState: ToolState = .input
     @Published var output = ""
@@ -48,9 +48,9 @@ class WebSummaryViewModel: ObservableObject {
 
 
 
-struct WebSummaryView: View {
+struct FeedSummaryView: View {
 
-    @ObservedObject var viewModel: WebSummaryViewModel
+    @ObservedObject var viewModel: FeedSummaryViewModel
     @State private var showSelectTextSheet = false
     
     @AppStorage("hasCustomAPIKeyIAP") var hasCustomAPIKeyIAP = false

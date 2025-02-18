@@ -128,12 +128,12 @@ struct FeedList: View {
     
     @ObservedObject var viewModel: FeedViewModel
     @State private var showSummarySheet = false
-    @StateObject private var summaryVM = WebSummaryViewModel()
+    @StateObject private var summaryVM = FeedSummaryViewModel()
     @State private var settingsDetent = PresentationDetent.fraction(0.2)
     
     var body: some View {
         
-        let summaryView = WebSummaryView(viewModel: summaryVM)
+        let summaryView = FeedSummaryView(viewModel: summaryVM)
         
         ZStack(alignment: .bottom) {
             ScrollView(showsIndicators: false) {
@@ -325,7 +325,7 @@ struct FeedList: View {
                         .font(.title)
                         .fontWeight(.semibold)
                     
-                    WebSummaryView(viewModel: summaryVM)
+                    FeedSummaryView(viewModel: summaryVM)
                 }
                 .presentationDetents([.fraction(0.5)])
             }
@@ -414,25 +414,22 @@ struct LoadingView: View {
                     
                     
                     HStack(spacing: 10) {
-                        // Like buttons
                         
-                        Button {
-                            
-                        } label: {
-                            Image(systemName: "heart")
-                                .font(.system(size: 20))
-                                .foregroundColor(.gray)
-                        }
+                        // Like buttons
+                        Image(systemName: "heart")
+                            .font(.system(size: 20))
+                            .foregroundColor(.gray)
                         
                         
                         // Dislike button
-                        Button {
-                            
-                        } label: {
-                            Image(systemName: "hand.thumbsdown")
-                                .font(.system(size: 18.5))
-                                .foregroundColor(.gray)
-                        }
+                        Image(systemName: "hand.thumbsdown")
+                            .font(.system(size: 18.5))
+                            .foregroundColor(.gray)
+                        
+                        
+                        Image(systemName: "text.bubble")
+                            .font(.system(size: 20))
+                            .foregroundColor(.gray)
                         
                         Spacer()
                     }
