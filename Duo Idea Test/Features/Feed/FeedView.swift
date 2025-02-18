@@ -18,7 +18,7 @@ struct FeedView: View {
     
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 
                 switch viewModel.viewState {
@@ -145,20 +145,20 @@ struct FeedList: View {
                                             AsyncImage(url: thumbnail) { image in
                                                 image
                                                     .resizable()
-                                                    .scaledToFill()
-                                                    .frame(height: 200)
-                                                    .clipped()
+                                                    .scaledToFit() // Ensures the image fits inside the frame without expansion
+                                                    .frame(maxWidth: .infinity, maxHeight: 200) // Keeps it contained
+                                                    .clipped() // Prevents any overflow
                                                     .cornerRadius(8)
                                             } placeholder: {
                                                 Rectangle()
                                                     .fill(Color.gray.opacity(0.1))
-                                                    .frame(height: 200)
+                                                    .frame(height: 200) // Matches the expected size
                                                     .cornerRadius(8)
                                             }
                                         } else {
                                             Rectangle()
                                                 .fill(Color.gray.opacity(0.1))
-                                                .frame(height: 200)
+                                                .frame(height: 200) // Ensures consistent height
                                                 .cornerRadius(8)
                                         }
                                         

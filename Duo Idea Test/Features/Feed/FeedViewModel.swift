@@ -412,7 +412,7 @@ class FeedViewModel: ObservableObject {
                             link: postURL,
                             postDate: postDate!, // now hopefully extracted from JSON (or fallback)
                             category: categoryResponse.text ?? "General",
-                            icon: thumbnail ?? image
+                            icon: thumbnail
                         )
                         
                         print("\nFinal Item – Title: \(title), Category: \(categoryResponse.text ?? "General")\n")
