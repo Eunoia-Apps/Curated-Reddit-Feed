@@ -10,21 +10,6 @@ import ActivityIndicatorView
 import ChatField
 import WebKit
 
-// MARK: - WebView for WKWebView Sheet
-struct WebView: UIViewRepresentable {
-    let url: URL
-    
-    func makeUIView(context: Context) -> WKWebView {
-        return WKWebView()
-    }
-    
-    func updateUIView(_ uiView: WKWebView, context: Context) {
-        let request = URLRequest(url: url)
-        uiView.load(request)
-    }
-}
-
-
 
 struct FeedView: View {
     
@@ -71,18 +56,7 @@ struct FeedView: View {
                     
                 }
                 
-                
-                // Favorite posts
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    NavigationLink {
-                        
-                    } label: {
-                        Image(systemName: "heart")
-                            .font(.system(size: 16, weight: .medium, design: .rounded))
-                    }
-                    .buttonStyle(.plain)
-                }
-                
+            
                 // Settings
                 ToolbarItem(placement: .navigationBarTrailing) {
                     NavigationLink {
@@ -464,7 +438,7 @@ struct LoadingView: View {
                                 .foregroundColor(.gray)
                                 .opacity(0)
                         }
-                        .padding(.vertical, 6)
+                        .padding(.vertical, 2)
                         .padding(.horizontal)
                         .frame(maxWidth: .infinity)
                         
@@ -472,7 +446,8 @@ struct LoadingView: View {
                     }
                     .background(.gray.opacity(0.09))
                     .cornerRadius(8)
-                    .redacted(reason: .placeholder).overlay {
+                    .redacted(reason: .placeholder)
+                    .overlay {
                         RoundedRectangle(cornerRadius: 8)
                             .stroke(.primary.opacity(0.1), lineWidth: 1)
                     }
