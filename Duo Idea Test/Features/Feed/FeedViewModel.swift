@@ -227,8 +227,6 @@ class FeedViewModel: ObservableObject {
   
     @Published var model: GenerativeModel?
     @AppStorage("keywords") var keywords: String = ""
-    @Published var answer: String = ""
-    @Published var mainImage = ""
     @Published var title = ""
     @Published var currentWebpage = ""
     @Published var errorMessage = ""
@@ -250,12 +248,15 @@ class FeedViewModel: ObservableObject {
     
     @Published var array = [String]()
     
-    // Add loadMore function
+    
+    
+    // LoadMore for pagination
     func loadMore() {
         guard !isLoadingMore else { return }
         fetch(loadMore: true)
     }
     
+    // Fetch
     func fetch(loadMore: Bool = false) {
         
         print("Current page: \(currentPage)")
@@ -491,6 +492,27 @@ class FeedViewModel: ObservableObject {
         }
     }
     
+    
+    func refetch() {
+        
+        //Reset variables
+        sourceArray.removeAll()
+        array.removeAll()
+        
+        currentPage = 1
+        linkCount = 1
+        isLoadingMore = false
+        
+        error = ""
+        errorMessage = ""
+    
+        fetch()
+    }
+    
+    
+    
+    //MARK: - Helper functions
+    
     private func extractFaviconURL(from html: String, baseURL: URL) -> URL? {
         let pattern = "<link[^>]+rel=\"shortcut icon\"[^>]+href=\"([^\"]+)\""
         let regex = try? NSRegularExpression(pattern: pattern, options: [])
@@ -563,4 +585,5 @@ class FeedViewModel: ObservableObject {
         // If everything fails, return nil
         return nil
     }
+    
 }

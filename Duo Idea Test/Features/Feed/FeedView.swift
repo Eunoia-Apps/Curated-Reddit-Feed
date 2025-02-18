@@ -41,6 +41,22 @@ struct FeedView: View {
                         .font(.system(size: 16.5, weight: .bold, design: .rounded))
                 }
                 
+                // Reload feed
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        viewModel.refetch()
+                    } label: {
+                        Image(systemName: "arrow.circlepath")
+                            .font(.system(size: 16, weight: .medium, design: .rounded))
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(viewModel.viewState == .loading)
+                    .disabled(viewModel.viewState == .input)
+                    
+                }
+                
+                
+                // Favorite posts
                 ToolbarItem(placement: .navigationBarTrailing) {
                     NavigationLink {
                         
@@ -51,9 +67,10 @@ struct FeedView: View {
                     .buttonStyle(.plain)
                 }
                 
+                // Settings
                 ToolbarItem(placement: .navigationBarTrailing) {
                     NavigationLink {
-                        SettingsView()
+                        SettingsView(viewModel: viewModel)
                     } label: {
                         Image(systemName: "gearshape.fill")
                             .font(.system(size: 16, weight: .medium, design: .rounded))
@@ -66,10 +83,16 @@ struct FeedView: View {
             }
             .onAppear {
                 
-                if !viewModel.keywords.isEmpty && viewModel.viewState != .success {
-                    viewModel.fetch()
+                if viewModel.keywords.isEmpty {
+                    viewModel.viewState = .input
+                } else {
+                    
+                    if viewModel.viewState != .success {
+                        viewModel.fetch()
+                    }
+                    
                 }
-                
+               
             }
             
         }

@@ -10,7 +10,8 @@ import SwiftUI
 struct SettingsView: View {
     
     @AppStorage("keywords") var keywords: String = ""
-    @AppStorage("state") var viewState: SearchState = .input
+    
+    @ObservedObject var viewModel: FeedViewModel
     
     var body: some View {
         ScrollView {
@@ -35,7 +36,7 @@ struct SettingsView: View {
                     )
                     .onChange(of: keywords, { oldValue, newValue in
                         if newValue.isEmpty == false {
-                            viewState = .loading
+                            viewModel.viewState = .loading
                         }
                     })
                     .padding(.horizontal)
@@ -58,6 +59,6 @@ struct SettingsView: View {
 
 #Preview {
     NavigationView {
-        SettingsView()
+        SettingsView(viewModel: FeedViewModel())
     }
 }
