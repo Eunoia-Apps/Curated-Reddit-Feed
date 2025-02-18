@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 struct SearchItem: Codable, Identifiable {
     let id = UUID()
@@ -80,10 +81,10 @@ extension SearchItem {
         let recencyScore = max(0, 50 - daysSincePost)
         score += recencyScore
         
-        let voteScore = (self.upvoteCount * 3/2)
+        let voteScore = (log2(Float(self.upvoteCount)))
         score += Double(voteScore)
         
-        let commentScore = (self.commentCount * 3/2)
+        let commentScore = (log2(Float(self.commentCount)))
         score += Double(commentScore)
         
         // Factor 3: How many times the post's category has been liked by user
