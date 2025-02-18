@@ -14,66 +14,46 @@ import Fuzi
 @MainActor
 class FeedViewModel: ObservableObject {
     
-    func toggleLike(post: SearchItem) {
-        if let index = sourceArray.firstIndex(where: { $0.id == post.id }) {
-            sourceArray[index].likePost()
-        }
-    }
-    
-    func toggleUnlike(post: SearchItem) {
-        if let index = sourceArray.firstIndex(where: { $0.id == post.id }) {
-            sourceArray[index].unlikePost()
-        }
-    }
-    
-    func toggleDislike(post: SearchItem) {
-        if let index = sourceArray.firstIndex(where: { $0.id == post.id }) {
-            sourceArray[index].dislikePost()
-            withAnimation(.smooth(duration: 0.35)) {
-                sourceArray.remove(at: index)
-            }
-        }
-    }
-    
+    //MARK: - Properties
     
     @AppStorage("GeminiAPIKey") var apiKey = "AIzaSyDawRzTtS5kG-fO53AB644r3U8qoJLgHJQ"
     @AppStorage("SerperAPIKey") var serperApiKey = "7ede09eb36d4ca8a82acb8c04e15f4ca18ccafc3"
+    @AppStorage("keywords") var keywords: String = ""
     
     @Published var viewState: SearchState = .input
-    
     @Published var model: GenerativeModel?
-    @AppStorage("keywords") var keywords: String = ""
-    @Published var title = ""
-    @Published var currentWebpage = ""
+    @Published var sourceArray: [SearchItem] = []
+    
     @Published var errorMessage = ""
     @Published var error = ""
     @Published var waiting = false
     
-    @Published var sourceArray: [SearchItem] = []
+    // Add these properties to FeedViewModel
+    @Published var currentPage = 1
+    @Published var linkCount = 1
+    @Published var isLoadingMore = false
+    @Published var keywordResultArray = [String]()
     
-    @Published var safetySettings = [
+    private var safetySettings = [
         SafetySetting(harmCategory: .dangerousContent, threshold: .blockNone),
         SafetySetting(harmCategory: .harassment, threshold: .blockNone),
         SafetySetting(harmCategory: .hateSpeech, threshold: .blockNone),
         SafetySetting(harmCategory: .sexuallyExplicit, threshold: .blockNone),
     ]
     
-    // Add these properties to FeedViewModel
-    @Published var currentPage = 1
-    @Published var linkCount = 1
-    @Published var isLoadingMore = false
-    
-    @Published var array = [String]()
     
     
     
-    // LoadMore for pagination
+    
+    //MARK: - Fetch methods
+    
+    // Load more for pagination method
     func loadMore() {
         guard !isLoadingMore else { return }
         fetch(loadMore: true)
     }
     
-    // Fetch
+    // Main fetch method
     func fetch(loadMore: Bool = false) {
         
         waiting = true
@@ -92,7 +72,7 @@ class FeedViewModel: ObservableObject {
         Task(priority: .high) {
             do {
                 
-                if array.isEmpty {
+                if keywordResultArray.isEmpty {
                     model = GenerativeModel(
                         name: "gemini-2.0-flash",
                         apiKey: apiKey,
@@ -117,16 +97,16 @@ class FeedViewModel: ObservableObject {
                         if let data = response.text!.data(using: .utf8) {
                             let subreddits = try JSONSerialization.jsonObject(with: data, options: []) as? [String]
                             print(subreddits ?? [])
-                            array = subreddits ?? []
+                            keywordResultArray = subreddits ?? []
                         }
                     } catch {
                         print("Error parsing response: \(error)")
                     }
                 }
                 
-                if array.count >= 3 {
+                if keywordResultArray.count >= 3 {
                     linkCount = 3
-                } else if array.count == 2 {
+                } else if keywordResultArray.count == 2 {
                     linkCount = 2
                 } else {
                     
@@ -136,7 +116,7 @@ class FeedViewModel: ObservableObject {
                 
                 var miniArray = [SearchItem]()
                 
-                for subreddit in array {
+                for subreddit in keywordResultArray {
                     
                     let parameters = "{\"q\":\"site:reddit.com/\(subreddit)\",\"num\":\(linkCount),\"tbs\":\"qdr:w\",\"page\":\(currentPage)}"
                     let postData = parameters.data(using: .utf8)
@@ -157,72 +137,76 @@ class FeedViewModel: ObservableObject {
                     
                     
                     for link in organic {
+                        
                         guard var urlString = link.link else { continue }
                         
                         urlString = normalizeRedditURL(urlString)
                         
                         guard let url = URL(string: urlString) else { continue }
                         
-                        // Try to get the post date (and other data) from Reddit's JSON endpoint
+                        // Variables for getting the post date (and other data) from Reddit's JSON endpoint
                         var title: String = link.title ?? "No title"
                         var author: String = ""
-                        //var subredditName: String = ""
                         var score: Int = 0
                         var thumbnail: URL? = nil
                         var bodyText = ""
                         var postDate: Date? = nil
-                        let postURL: String = urlString
-                        var comments: [String] = []
+                        var postURL: String = urlString
+                        var commentCount = 0
                         
                         if let host = url.host {
                             
-                                // Append ".json" if necessary.
+                            // Construct the JSON URL, ensuring it ends with ".json"
                             let jsonURLString = url.absoluteString.hasSuffix(".json") ? url.absoluteString : url.absoluteString + ".json"
-                                if let jsonURL = URL(string: jsonURLString),
-                                              let (jsonData, _) = try? await URLSession.shared.data(for: URLRequest(url: jsonURL, timeoutInterval: 15)),
-                                   let jsonArray = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [Any],
-                                   let firstItem = jsonArray.first as? [String: Any],
-                                   let dataDict = firstItem["data"] as? [String: Any],
-                                   let children = dataDict["children"] as? [[String: Any]],
-                                   let firstChild = children.first,
-                                   let childData = firstChild["data"] as? [String: Any] {
-                                        
-                                        title = childData["title"] as? String ?? title
-                                        author = childData["author"] as? String ?? ""
-                                score = childData["score"] as? Int ?? 0
-                                        
-                                        // Extract the post body (if applicable)
-                                bodyText = childData["selftext"] as? String ?? ""
-                                        
-                                        // Extract comments body (if applicable)
-                                       
-                                        if let secondItem = jsonArray.dropFirst().first as? [String: Any],
-                                                          let commentsData = secondItem["data"] as? [String: Any],
-                                           let commentsChildren = commentsData["children"] as? [[String: Any]] {
-                                                comments = commentsChildren.compactMap { ($0["data"] as? [String: Any])?["body"] as? String }
-                                            }
-                                        
-                                        if let createdUTC = childData["created_utc"] as? TimeInterval {
-                                                postDate = Date(timeIntervalSince1970: createdUTC)
-                                            }
+                            
+                            if let jsonURL = URL(string: jsonURLString),
+                               let (jsonData, _) = try? await URLSession.shared.data(for: URLRequest(url: jsonURL, timeoutInterval: 20)),
+                               let jsonArray = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [Any],
+                               let firstItem = jsonArray.first as? [String: Any],
+                               let dataDict = firstItem["data"] as? [String: Any],
+                               let children = dataDict["children"] as? [[String: Any]],
+                               let firstChild = children.first,
+                               let childData = firstChild["data"] as? [String: Any] {
                                 
-                                        if let thumbString = childData["thumbnail"] as? String,
-                                                          !thumbString.isEmpty,
-                                           thumbString.lowercased() != "self",
-                                           thumbString.lowercased() != "default",
-                                           let thumbURL = URL(string: thumbString) {
-                                                thumbnail = thumbURL
-                                            }
-                                        
-                                        print("Parsed from JSON – Title: \(title), Author: \(author)")
-                                        print("Post Date: \(postDate?.description ?? "nil"), Thumbnail: \(thumbnail?.absoluteString ?? "none")")
-                                        print("Post Body: \(bodyText)")
-                                        print("Comments: \(comments)")
-                                    }
+                                // Extract primary post details
+                                title = childData["title"] as? String ?? title
+                                author = childData["author"] as? String ?? ""
+                                score = childData["score"] as? Int ?? 0
+                                
+                                // Extract post body text (if applicable)
+                                bodyText = childData["selftext"] as? String ?? ""
+                                
+                                // Extract comment count (if available)
+                                if let secondItem = jsonArray.dropFirst().first as? [String: Any],
+                                   let commentsData = secondItem["data"] as? [String: Any],
+                                   let commentsChildren = commentsData["children"] as? [[String: Any]] {
+                                    commentCount = commentsChildren.count
+                                }
+                                
+                                // Extract post creation date (if available)
+                                if let createdUTC = childData["created_utc"] as? TimeInterval {
+                                    postDate = Date(timeIntervalSince1970: createdUTC)
+                                }
+                                
+                                // Extract thumbnail image URL (if applicable and valid)
+                                if let thumbString = childData["thumbnail"] as? String,
+                                   !thumbString.isEmpty,
+                                   thumbString.lowercased() != "self",
+                                   thumbString.lowercased() != "default",
+                                   let thumbURL = URL(string: thumbString) {
+                                    thumbnail = thumbURL
+                                }
+                                
+                                // Debugging logs for extracted data
+                                print("\nParsed from JSON – Title: \(title), Author: \(author)")
+                                print("Post Date: \(postDate?.description ?? "nil"), Thumbnail: \(thumbnail?.absoluteString ?? "none")")
+                                print("Post Body: \(bodyText)\n")
+                            }
                         }
+
                         
                         
-                        // Get category via your AI model.
+                        // Get category of post via LLM.
                         let categoryResponse = try await GenerativeModel(
                             name: "gemini-2.0-flash-lite-preview",
                             apiKey: apiKey,
@@ -233,16 +217,18 @@ class FeedViewModel: ObservableObject {
                             
                                Give me ONLY a single category from this list—nothing else. Do not provide explanations or additional context.
                             """
-                        ).generateContent("Categorize this post: \(title)")
+                        )
+                        .generateContent("Categorize this post: \(title)")
                         
-                        // Build your SearchItem. (Extend SearchItem if you wish to store more fields.)
+                        
+                        // Build SearchItem
                         var item = SearchItem(
                             title: title,
                             link: postURL,
                             postDate: postDate ?? Date(), // now hopefully extracted from JSON (or fallback)
                             category: categoryResponse.text ?? "General",
                             thumbnail: thumbnail,
-                            commentCount: comments.count,
+                            commentCount: commentCount,
                             upvoteCount: score,
                             text: bodyText
                         )
@@ -271,7 +257,7 @@ class FeedViewModel: ObservableObject {
                     }
                     
                     // After nested loop ends; by subreddit
-                    if array.count >= 3 {
+                    if keywordResultArray.count >= 3 {
                         withAnimation(.smooth(duration: 0.3)) {
                             sourceArray += miniArray
                         }
@@ -285,7 +271,7 @@ class FeedViewModel: ObservableObject {
                 }
                 
                 // After entire loop ends
-                if array.count < 3 {
+                if keywordResultArray.count < 3 {
                     withAnimation(.smooth(duration: 0.3)) {
                         sourceArray += miniArray
                     }
@@ -313,12 +299,12 @@ class FeedViewModel: ObservableObject {
         }
     }
     
-    
+    // Refetch method
     func refetch() {
         
         //Reset variables
         sourceArray.removeAll()
-        array.removeAll()
+        keywordResultArray.removeAll()
         
         currentPage = 1
         linkCount = 1
@@ -332,7 +318,9 @@ class FeedViewModel: ObservableObject {
     
     
     
-    //MARK: - Helper functions
+    
+    
+    //MARK: - Helper methods
     
     private func extractFaviconURL(from html: String, baseURL: URL) -> URL? {
         let pattern = "<link[^>]+rel=\"shortcut icon\"[^>]+href=\"([^\"]+)\""
@@ -360,5 +348,36 @@ class FeedViewModel: ObservableObject {
     }
     
     
+}
 
+
+
+
+extension FeedViewModel {
+    
+    //MARK: - Post interaction methods
+    func toggleLike(post: SearchItem) {
+        if let index = sourceArray.firstIndex(where: { $0.id == post.id }) {
+            sourceArray[index].likePost()
+        }
+    }
+    
+    
+    func toggleUnlike(post: SearchItem) {
+        if let index = sourceArray.firstIndex(where: { $0.id == post.id }) {
+            sourceArray[index].unlikePost()
+        }
+    }
+    
+    
+    func toggleDislike(post: SearchItem) {
+        if let index = sourceArray.firstIndex(where: { $0.id == post.id }) {
+            sourceArray[index].dislikePost()
+            withAnimation(.smooth(duration: 0.35)) {
+                sourceArray.remove(at: index)
+            }
+        }
+    }
+    
+    
 }
