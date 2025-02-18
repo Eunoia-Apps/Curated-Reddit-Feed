@@ -127,8 +127,14 @@ struct InputView: View {
 struct FeedList: View {
     
     @ObservedObject var viewModel: FeedViewModel
+    @State private var showSummarySheet = false
+    @StateObject private var summaryVM = WebSummaryViewModel()
+    @State private var settingsDetent = PresentationDetent.fraction(0.2)
     
     var body: some View {
+        
+        let summaryView = WebSummaryView(viewModel: summaryVM)
+        
         ZStack(alignment: .bottom) {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 10) {
@@ -254,6 +260,17 @@ struct FeedList: View {
                                                 .foregroundColor(.gray)
                                         }
                                         
+                                        Button {
+                                            summaryVM.url = link.link
+                                            summaryVM.customPrompt = "Please summarize the content of this Reddit post."
+                                            summaryView.sumWeb()
+                                            showSummarySheet = true
+                                        } label: {
+                                            Image(systemName: "text.bubble")
+                                                .font(.system(size: 20))
+                                                .foregroundColor(.gray)
+                                        }
+                                        
                                         Spacer()
                                     }
                                 }
@@ -288,6 +305,29 @@ struct FeedList: View {
                         }
                     }
                 }
+            }
+        }
+        .sheet(isPresented: $showSummarySheet) {
+            ScrollView {
+                VStack(spacing: 0.1) {
+                    Rectangle()
+                        .foregroundColor(.gray.opacity(0.4))
+                        .frame(width: 60, height: 5)
+                        .cornerRadius(20)
+                        .padding(.vertical, 10)
+                    
+                    Divider()
+                        .opacity(0.5)
+                    
+                    Spacer()
+                    
+                    Text("Summary")
+                        .font(.title)
+                        .fontWeight(.semibold)
+                    
+                    WebSummaryView(viewModel: summaryVM)
+                }
+                .presentationDetents([.fraction(0.5)])
             }
         }
     }
