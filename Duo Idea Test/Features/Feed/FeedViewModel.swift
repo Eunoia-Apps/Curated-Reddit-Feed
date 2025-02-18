@@ -322,7 +322,7 @@ class FeedViewModel: ObservableObject {
                     let parameters = "{\"q\":\"site:reddit.com/\(subreddit)\",\"num\":\(linkCount),\"tbs\":\"qdr:w\",\"page\":\(currentPage)}"
                     let postData = parameters.data(using: .utf8)
                     
-                    var request = URLRequest(url: URL(string: "https://google.serper.dev/search")!, timeoutInterval: Double.infinity)
+                    var request = URLRequest(url: URL(string: "https://google.serper.dev/search")!, timeoutInterval: 30)
                     request.addValue(serperApiKey, forHTTPHeaderField: "X-API-KEY")
                     request.addValue("application/json", forHTTPHeaderField: "Content-Type")
                     request.httpMethod = "POST"
