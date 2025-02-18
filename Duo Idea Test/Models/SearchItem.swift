@@ -32,23 +32,23 @@ extension SearchItem {
     mutating func likePost() {
         self.isLiked = true
         
-        if let currentCount = AlgorithmCore.shared.likedCategories[self.category] {
-            AlgorithmCore.shared.likedCategories[self.category] = currentCount + 1
+        if let currentCount = AlgorithmManager.shared.likedCategories[self.category] {
+            AlgorithmManager.shared.likedCategories[self.category] = currentCount + 1
         } else {
-            AlgorithmCore.shared.likedCategories[self.category] = 1  // If the category doesn't exist, initialize it with 1
+            AlgorithmManager.shared.likedCategories[self.category] = 1  // If the category doesn't exist, initialize it with 1
         }
         
-        AlgorithmCore.shared.likedPosts.append(self)
+        AlgorithmManager.shared.likedPosts.append(self)
     }
     
     mutating func unlikePost() {
         self.isLiked = false
         
-        if let currentCount = AlgorithmCore.shared.likedCategories[self.category] {
-            AlgorithmCore.shared.likedCategories[self.category] = currentCount - 1
+        if let currentCount = AlgorithmManager.shared.likedCategories[self.category] {
+            AlgorithmManager.shared.likedCategories[self.category] = currentCount - 1
         }
         
-        AlgorithmCore.shared.likedPosts.removeAll { post in
+        AlgorithmManager.shared.likedPosts.removeAll { post in
             (post.link == self.link) && (post.title == self.title)
         }
     }
@@ -57,13 +57,13 @@ extension SearchItem {
     mutating func dislikePost() {
         self.isLiked = false
         
-        if let currentCount = AlgorithmCore.shared.likedCategories[self.category] {
-            AlgorithmCore.shared.likedCategories[self.category] = currentCount - 1
+        if let currentCount = AlgorithmManager.shared.likedCategories[self.category] {
+            AlgorithmManager.shared.likedCategories[self.category] = currentCount - 1
         } else {
-            AlgorithmCore.shared.likedCategories[self.category] = -1  // If the category doesn't exist, initialize it with -1
+            AlgorithmManager.shared.likedCategories[self.category] = -1  // If the category doesn't exist, initialize it with -1
         }
         
-        AlgorithmCore.shared.dislikedPosts.append(self)
+        AlgorithmManager.shared.dislikedPosts.append(self)
     }
     
     
@@ -89,7 +89,7 @@ extension SearchItem {
         
         // Factor 3: How many times the post's category has been liked by user
         
-        if let currentCount = AlgorithmCore.shared.likedCategories[self.category] {
+        if let currentCount = AlgorithmManager.shared.likedCategories[self.category] {
             score += Double((currentCount * 3/2))
         }
         

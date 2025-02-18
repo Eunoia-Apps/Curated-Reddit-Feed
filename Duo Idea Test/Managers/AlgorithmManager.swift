@@ -1,5 +1,5 @@
 //
-//  AlgorithmCore.swift
+//  AlgorithmManager.swift
 //  Duo Idea Test
 //
 //  Created by Bigba on 2/18/25.
@@ -8,10 +8,10 @@
 import Foundation
 
 
-class AlgorithmCore {
+class AlgorithmManager {
     
     // Singleton
-    static let shared = AlgorithmCore()
+    static let shared = AlgorithmManager()
     
     
     var likedCategories = [String: Int]() {
