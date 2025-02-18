@@ -231,6 +231,7 @@ class FeedViewModel: ObservableObject {
     @Published var currentWebpage = ""
     @Published var errorMessage = ""
     @Published var error = ""
+    @Published var waiting = false
     
     @Published var sourceArray: [SearchItem] = []
     
@@ -258,6 +259,8 @@ class FeedViewModel: ObservableObject {
     
     // Fetch
     func fetch(loadMore: Bool = false) {
+        
+        waiting = true
         
         print("Current page: \(currentPage)")
         
@@ -473,12 +476,14 @@ class FeedViewModel: ObservableObject {
                 currentPage += 1
                 isLoadingMore = false
                 
+                waiting = false
 //                withAnimation(.smooth(duration: 0.3)) {
 //                    viewState = .success
 //                }
                 
                 
             } catch {
+                waiting = false
                 isLoadingMore = false
                 self.error = "\(error)"
                 errorMessage = "\(error)"

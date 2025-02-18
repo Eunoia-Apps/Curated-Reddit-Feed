@@ -291,7 +291,9 @@ struct FeedList: View {
                                 .buttonStyle(.plain)
                                 .onScrollVisibilityChange({ visible in
                                     if visible, link.id == viewModel.sourceArray.last?.id {
-                                        viewModel.loadMore()
+                                        if !viewModel.waiting {
+                                            viewModel.loadMore()
+                                        }
                                     }
                                 })
                                 
