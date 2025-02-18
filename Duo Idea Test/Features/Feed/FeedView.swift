@@ -153,9 +153,7 @@ struct FeedList: View {
     @State private var settingsDetent = PresentationDetent.fraction(0.2)
     
     var body: some View {
-        
-        let summaryView = FeedSummaryView(viewModel: summaryVM)
-        
+            
         ZStack(alignment: .bottom) {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 10) {
@@ -282,9 +280,7 @@ struct FeedList: View {
                                         }
                                         
                                         Button {
-                                            summaryVM.url = link.link
-                                            summaryVM.customPrompt = "Please summarize the content of this Reddit post."
-                                            summaryView.sumWeb()
+                                            summaryVM.sumWeb(post: link)
                                             showSummarySheet = true
                                         } label: {
                                             Image(systemName: "text.bubble")
