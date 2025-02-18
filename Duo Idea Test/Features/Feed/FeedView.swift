@@ -92,7 +92,7 @@ struct FeedView: View {
                     }
                     
                 }
-               
+                
             }
             
         }
@@ -111,8 +111,8 @@ struct FeedView: View {
 
 
 
-// MARK: - Subviews
 
+// MARK: - Input View
 struct InputView: View {
     var body: some View {
         VStack(spacing: 0) {
@@ -147,6 +147,10 @@ struct InputView: View {
 }
 
 
+
+
+
+// MARK: - FeedList
 struct FeedList: View {
     
     @ObservedObject var viewModel: FeedViewModel
@@ -331,27 +335,31 @@ struct FeedList: View {
             }
         }
         .sheet(isPresented: $showSummarySheet) {
-            ScrollView {
-                VStack(spacing: 0.1) {
-                    Rectangle()
-                        .foregroundColor(.gray.opacity(0.4))
-                        .frame(width: 60, height: 5)
-                        .cornerRadius(20)
-                        .padding(.vertical, 10)
-                    
-                    Divider()
-                        .opacity(0.5)
-                    
-                    Spacer()
-                    
-                    Text("Summary")
-                        .font(.title)
+            
+            VStack(spacing: 0.1) {
+                Rectangle()
+                    .foregroundColor(.gray.opacity(0.4))
+                    .frame(width: 60, height: 5)
+                    .cornerRadius(20)
+                    .padding(.vertical, 10)
+                
+                Divider()
+                    .opacity(0.5)
+                
+                Spacer()
+                
+                ScrollView {
+                    Text("Post Summary")
+                        .font(.title3)
                         .fontWeight(.semibold)
+                        .fontDesign(.rounded)
+                        .padding(.vertical, 12)
                     
                     FeedSummaryView(viewModel: summaryVM)
                 }
-                .presentationDetents([.fraction(0.5)])
             }
+            .presentationDetents([.fraction(0.5)])
+            
         }
     }
     
@@ -363,6 +371,11 @@ struct FeedList: View {
     }()
 }
 
+
+
+
+
+// MARK: - LoadingView
 struct LoadingView: View {
     
     
@@ -475,6 +488,10 @@ struct LoadingView: View {
 }
 
 
+
+
+
+// MARK: - ErrorView
 struct ErrorView: View {
     
     @ObservedObject var viewModel: FeedViewModel
