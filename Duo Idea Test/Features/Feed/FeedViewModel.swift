@@ -98,6 +98,7 @@ class FeedViewModel: ObservableObject {
                             let subreddits = try JSONSerialization.jsonObject(with: data, options: []) as? [String]
                             print(subreddits ?? [])
                             keywordResultArray = subreddits ?? []
+                            keywordResultArray.shuffle()
                         }
                     } catch {
                         print("Error parsing response: \(error)")
