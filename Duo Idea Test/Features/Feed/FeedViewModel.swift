@@ -221,7 +221,7 @@ class FeedViewModel: ObservableObject {
     static let userDefaults = UserDefaults(suiteName: "group.demo.app")!
     
     @AppStorage("GeminiAPIKey") var apiKey = "AIzaSyDawRzTtS5kG-fO53AB644r3U8qoJLgHJQ"
-    @AppStorage("SerperAPIKey") var serperApiKey = "0d34a8e70e5fa38a3f3371169678d8eb6c93c96a"
+    @AppStorage("SerperAPIKey") var serperApiKey = "7ede09eb36d4ca8a82acb8c04e15f4ca18ccafc3"
     
     @Published var viewState: SearchState = .input
   
