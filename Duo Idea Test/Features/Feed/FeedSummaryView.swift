@@ -50,7 +50,7 @@ class FeedSummaryViewModel: ObservableObject {
                     apiKey: apiKey,
                     generationConfig: GenerationConfig(temperature: 0.4),
                     systemInstruction: """
-                                       Summarize this reddit post in 100 words or less.
+                                       Summarize this reddit post in 100 words or less. DO NOT provide anything additional, or add your own commentary to it. Simply summarize what the post says.
                                    """
                 )
                 
