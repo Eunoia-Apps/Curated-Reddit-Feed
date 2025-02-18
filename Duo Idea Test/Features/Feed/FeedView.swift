@@ -120,18 +120,12 @@ struct InputView: View {
             Spacer()
             
             
-            HStack {
+            VStack {
                 Text("Please input keywords in settings")
-                    .font(.title2)
-                    .fontWeight(.heavy)
+                    .font(.title3)
+                    .fontWeight(.bold)
                 
-                Divider()
-                    .frame(height: 20)
-                
-                Text("Reddit")
-                    .font(.subheadline)
-                    .fontDesign(.monospaced)
-                
+             
             }
             .padding(8)
             .padding(.bottom, 24)
