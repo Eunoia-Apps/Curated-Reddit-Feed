@@ -162,43 +162,20 @@ struct FeedList: View {
                                                 .cornerRadius(8)
                                         }
                                         
-                                        HStack(spacing: 12) {
-                                            // Display a small icon (if needed; adjust if your model provides a separate favicon).
-                                            if let host = URL(string: link.link)?.host, host.contains("reddit.com") {
-                                                    // Display a custom "redditIcon" from your Assets catalog
-                                                    Image("redditIcon")
-                                                        .resizable()
-                                                        .scaledToFit()
-                                                        .frame(width: 32, height: 32)
-                                                        .cornerRadius(4)
-                                                }
-                                                // 2) Otherwise, use the normal icon or fallback
-                                                else if let iconURL = link.icon {
-                                                    AsyncImage(url: iconURL) { image in
-                                                        image
-                                                            .resizable()
-                                                            .scaledToFill()
-                                                            .frame(width: 32, height: 32)
-                                                            .cornerRadius(4)
-                                                    } placeholder: {
-                                                        Image(systemName: "globe")
-                                                            .font(.system(size: 20))
-                                                            .foregroundColor(.indigo)
-                                                    }
-                                                }
+                                        
+                                          
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text(link.title)
+                                                .font(.headline)
+                                                .fontWeight(.semibold)
+                                                .multilineTextAlignment(.leading)
                                             
-                                            VStack(alignment: .leading, spacing: 4) {
-                                                Text(link.title)
-                                                    .font(.headline)
-                                                    .fontWeight(.semibold)
-                                                    .multilineTextAlignment(.leading)
-                                                
-                                                Text(link.postDate, formatter: itemDateFormatter)
-                                                    .font(.subheadline)
-                                                    .foregroundColor(.gray)
-                                            }
-                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            Text(link.postDate, formatter: itemDateFormatter)
+                                                .font(.subheadline)
+                                                .foregroundColor(.gray)
                                         }
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        
                                         
                                         HStack(spacing: 10) {
                                             // Like buttons

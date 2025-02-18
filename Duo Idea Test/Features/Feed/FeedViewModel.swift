@@ -339,12 +339,6 @@ class FeedViewModel: ObservableObject {
                     for link in organic {
                         guard let urlString = link.link, let url = URL(string: urlString) else { continue }
                         
-//                        // Fetch the raw HTML first (still needed for favicon, etc.)
-//                        guard let htmlData = try? await URLSession.shared.data(for: URLRequest(url: url, timeoutInterval: 15)),
-//                              let html = String(data: htmlData.0, encoding: .utf8) else { continue }
-//                        
-//                        let image = extractFaviconURL(from: html, baseURL: url)
-//                        
                         // Try to get the post date (and other data) from Reddit's JSON endpoint
                         var title: String = link.title ?? "No title"
                         var author: String = ""
