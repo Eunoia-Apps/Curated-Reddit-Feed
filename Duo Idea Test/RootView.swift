@@ -8,10 +8,9 @@
 
 import SwiftUI
 
+//MARK: Main Content View
 struct RootView: View {
-    
-    
-    
+
     var body: some View {
         FeedView()
     }

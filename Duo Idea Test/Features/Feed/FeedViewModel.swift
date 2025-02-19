@@ -72,6 +72,7 @@ class FeedViewModel: ObservableObject {
         Task(priority: .high) {
             do {
                 
+                //Initializes Gemini AI model/instructions
                 if keywordResultArray.isEmpty {
                     model = GenerativeModel(
                         name: "gemini-2.0-flash",
@@ -117,6 +118,7 @@ class FeedViewModel: ObservableObject {
                 
                 var miniArray = [SearchItem]()
                 
+                //Extracts data from JSON
                 for subreddit in keywordResultArray {
                     
                     let parameters = "{\"q\":\"site:reddit.com/\(subreddit)\",\"num\":\(linkCount),\"tbs\":\"qdr:w\",\"page\":\(currentPage)}"

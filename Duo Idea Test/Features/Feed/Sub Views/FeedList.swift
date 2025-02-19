@@ -54,6 +54,7 @@ struct FeedList: View {
                                                     }
                                                 }
                                                 
+                                                //Post Title
                                                 Text(link.title)
                                                     .font(.headline)
                                                     .fontWeight(.semibold)
@@ -61,6 +62,7 @@ struct FeedList: View {
                                                     .frame(maxWidth: .infinity, alignment: .leading)
                                                     .padding(.top, 4)
                                                 
+                                                //If thumbnail is not showing and post text can be fetched, show post text
                                                 if link.thumbnail == nil && !link.text.isEmpty {
                                                     Text(link.text)
                                                         .font(.subheadline)
@@ -70,6 +72,7 @@ struct FeedList: View {
                                                         .frame(maxWidth: .infinity, alignment: .leading)
                                                 }
                                                 
+                                                // Upvote and comment count
                                                 HStack(spacing: 4) {
                                                     Image(systemName: "arrowshape.up")
                                                     
@@ -89,6 +92,7 @@ struct FeedList: View {
                                             .padding()
                                             .background(.white)
                                             
+                                            //Reddit name and post date
                                             HStack(spacing: 4) {
                                                 Text("Reddit")
                                                     .font(.subheadline)
@@ -177,6 +181,7 @@ struct FeedList: View {
                             }
                         }
                         
+                        //Loading animation
                         if viewModel.isLoadingMore || viewModel.waiting {
                             VStack {
                                 ActivityIndicatorView(isVisible: .constant(true), type: .opacityDots(count: 3, inset: 2))
@@ -196,6 +201,7 @@ struct FeedList: View {
         // Single sheet modifier that switches on the active sheet type.
         .sheet(item: $activeSheet) { sheet in
             switch sheet {
+            // Web View
             case .webView(let url):
                 NavigationView {
                     WebView(url: url)
@@ -204,6 +210,7 @@ struct FeedList: View {
                             activeSheet = nil
                         })
                 }
+            // Summary View
             case .summary:
                 VStack(spacing: 0.1) {
                     Rectangle()
@@ -232,6 +239,7 @@ struct FeedList: View {
         }
     }
     
+    //Date Formatter
     private let itemDateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium

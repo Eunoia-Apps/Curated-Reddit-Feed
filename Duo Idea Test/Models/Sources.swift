@@ -7,7 +7,7 @@
 
 import Foundation
 
-
+//MARK: Sample topics and subreddits
 struct Sources {
     
     static let topicCategories: [String] = [

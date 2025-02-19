@@ -9,6 +9,7 @@ import SwiftUI
 import ActivityIndicatorView
 import GoogleGeminiAI
 
+//MARK: Controls summarization loading status
 enum ToolState {
     case input
     case loading
@@ -16,7 +17,7 @@ enum ToolState {
     case error
 }
 
-
+//MARK: Summarization view model
 @MainActor
 class FeedSummaryViewModel: ObservableObject {
         
@@ -74,7 +75,7 @@ class FeedSummaryViewModel: ObservableObject {
 }
 
 
-
+//MARK: Summarization view (for sheet)
 struct FeedSummaryView: View {
 
     @ObservedObject var viewModel: FeedSummaryViewModel

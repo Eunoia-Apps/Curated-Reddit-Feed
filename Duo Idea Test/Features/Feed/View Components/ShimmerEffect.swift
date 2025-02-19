@@ -8,14 +8,14 @@
 import Foundation
 import SwiftUI
 
-
+//MARK: Adds Shimmer Effect to View
 extension View {
     func shimmerEffect(isLoading: Binding<Bool>, gradient: Gradient = ShimmerEffect.defaultGradient, animation: Animation =  ShimmerEffect.defaultAnimation, angle: Angle =  ShimmerEffect.defaultAngle) -> some View {
         self.modifier(ShimmerEffect(isLoading: isLoading, gradient: gradient, animation: animation, angle: angle))
     }
 }
 
-
+//MARK: Shimmer Effect Loading Animation
 struct ShimmerEffect: Animatable, ViewModifier {
     @Binding var isLoading: Bool
     

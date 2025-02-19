@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-
+//MARK: Feed View
 struct FeedView: View {
     
     @StateObject var viewModel = FeedViewModel()

@@ -7,6 +7,7 @@
 
 import Foundation
 
+//MARK: Controls state of feed
 enum SearchState: String, Codable {
     
     case input, loading, success, error

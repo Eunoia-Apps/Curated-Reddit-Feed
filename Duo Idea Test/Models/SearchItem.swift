@@ -8,6 +8,7 @@
 import Foundation
 import UIKit
 
+//MARK: Post Structure
 struct SearchItem: Codable, Identifiable {
     let id = UUID()
     
@@ -29,6 +30,7 @@ struct SearchItem: Codable, Identifiable {
 
 extension SearchItem {
     
+    //MARK: Reports liked, unliked, and disliked post to algorithm
     mutating func likePost() {
         self.isLiked = true
         

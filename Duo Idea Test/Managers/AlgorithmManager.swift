@@ -14,6 +14,7 @@ class AlgorithmManager {
     static let shared = AlgorithmManager()
     
     
+    // Reports liked categories and liked/disliked posts to JSON
     var likedCategories = [String: Int]() {
         didSet {
             UserDefaults.standard.set(likedCategories, forKey: "likedCategories")
